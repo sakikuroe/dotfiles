@@ -1,0 +1,20 @@
+# OpenAI Codex を使用するプロジェクトに配置する指示書
+AGENTS.md
+# OpenAI Codex を使用するプロジェクトに配置する設定ディレクトリ
+# `.codex/config.toml` などを配置する
+.codex
+# OpenAI Codex を使用するプロジェクトに配置するエージェント設定ディレクトリ
+# `.agents/skills/` などを配置する
+.agents
+
+# Claude Code を使用するプロジェクトに配置する指示書
+CLAUDE.md
+CLAUDE.local.md
+# Claude Code を使用するプロジェクトに配置する設定ディレクトリ
+# `.claude/settings.json` や `.claude.skills/` を配置する
+.claude
+
+# GitHub Copilot を使用するプロジェクトに配置する設定ディレクトリ
+# `.github/copilot-instructions.md` や `.github/skills/` を配置する
+.github/copilot-instructions.md
+.github/skills/
