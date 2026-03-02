@@ -3,5 +3,3 @@
 [core]
 	editor = vim
 	excludesfile = ~/.config/git/ignore
-[include]
-	path = ~/.gitconfig.local
