@@ -8,7 +8,13 @@
 def pretty_pwd [] {
   let home = $nu.home-dir
   let pwd  = $env.PWD
-  let shown = if ($pwd | str starts-with $home) { $pwd | str replace $home "~" } else { $pwd }
+  let shown = if ($pwd == $home) {
+    "~"
+  } else if ($pwd | str starts-with $"($home)/") {
+    $pwd | str replace $home "~"
+  } else {
+    $pwd
+  }
 
   if ($shown == "~") {
     "~"
@@ -66,7 +72,9 @@ def git_block [] {
     let ahead = if (($ab_parts | length) > 2) { $ab_parts | get 2 | str replace "+" "" | into int } else { 0 }
     let behind = if (($ab_parts | length) > 3) { $ab_parts | get 3 | str replace "-" "" | into int } else { 0 }
 
-    let tracked = ($lines | where {|l| ($l | str starts-with "1 ") or ($l | str starts-with "2 ") })
+    let tracked = ($lines | where {|l|
+      ($l | str starts-with "1 ") or ($l | str starts-with "2 ") or ($l | str starts-with "u ")
+    })
     let staged = ($tracked | where {|l|
       let cols = ($l | split row " " | where {|x| not ($x | is-empty) })
       let xy = if (($cols | length) > 1) { $cols | get 1 } else { ".." }

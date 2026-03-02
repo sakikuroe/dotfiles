@@ -30,7 +30,7 @@ chmod +x install.sh
 
 ```bash
 ls -l ~/.config/nushell/config.nu ~/.config/nushell/env.nu
-nu -c 'version'
+nu -i -c 'exit'
 ```
 
 `nu` 起動時に設定読込エラーが出ないことを確認してください.

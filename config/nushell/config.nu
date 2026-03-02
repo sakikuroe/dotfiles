@@ -6,5 +6,10 @@
 # 例: 次のような設定がある場合です.
 #   $env.config = ($env.config | upsert hooks.pre_prompt [ {|| ls } ])
 #
-# ls を停止するには pre_prompt を空にします (他にも入れている場合は ls のみ除去します).
-$env.config = ($env.config | upsert hooks.pre_prompt [])
+# ls を停止するには, pre_prompt から ls の hook のみを除去します.
+let pre_prompt_hooks = ($env.config.hooks.pre_prompt? | default [])
+let filtered_hooks = ($pre_prompt_hooks | where {|hook|
+  let hook_text = ($hook | to nuon --serialize | str trim | str replace '"' "")
+  not ($hook_text =~ '^\{\|\|\s*ls(\s+[^}]*)?\s*\}$')
+})
+$env.config = ($env.config | upsert hooks.pre_prompt $filtered_hooks)
