@@ -40,5 +40,7 @@ link() {
 
 link "$DOT/config/nushell/config.nu" "$HOME/.config/nushell/config.nu"
 link "$DOT/config/nushell/env.nu" "$HOME/.config/nushell/env.nu"
+link "$DOT/config/git/ignore" "$HOME/.config/git/ignore"
+link "$DOT/home/.gitconfig" "$HOME/.gitconfig"
 
 echo "done."
