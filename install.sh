@@ -38,7 +38,42 @@ link() {
   echo "linked: $dst -> $src"
 }
 
+ensure_gitconfig() {
+  local dst="$HOME/.gitconfig"
+  local changed=0
+
+  if [ -L "$dst" ]; then
+    backup "$dst"
+  elif [ -d "$dst" ]; then
+    echo "error (not a file): $dst" >&2
+    return 1
+  fi
+
+  if [ ! -e "$dst" ]; then
+    : > "$dst"
+  fi
+
+  if ! git config --file "$dst" --get-all include.path | grep -Fxq "~/.config/git/config"; then
+    git config --file "$dst" --add include.path "~/.config/git/config"
+    changed=1
+  fi
+
+  if ! git config --file "$dst" --get-all include.path | grep -Fxq "~/.gitconfig.local"; then
+    git config --file "$dst" --add include.path "~/.gitconfig.local"
+    changed=1
+  fi
+
+  if [ "$changed" -eq 1 ]; then
+    echo "updated: $dst"
+  else
+    echo "already configured: $dst"
+  fi
+}
+
 link "$DOT/config/nushell/config.nu" "$HOME/.config/nushell/config.nu"
 link "$DOT/config/nushell/env.nu" "$HOME/.config/nushell/env.nu"
+link "$DOT/config/git/config" "$HOME/.config/git/config"
+link "$DOT/config/git/ignore" "$HOME/.config/git/ignore"
+ensure_gitconfig
 
 echo "done."
