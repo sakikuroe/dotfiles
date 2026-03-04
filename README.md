@@ -2,13 +2,18 @@
 
 ## 目的
 
-このリポジトリーは, Nushell と Git の設定を symlink で管理します.
-現在の対象は, `config/nushell/config.nu`, `config/nushell/env.nu`, `config/git/config`, `config/git/ignore` です.
+このリポジトリーは, Nushell, WezTerm, Git の設定を symlink で管理します.
+あわせて, WezTerm 用フォント `rounded-mgenplus-1m-regular.ttf` を自動配置します.
+現在の対象は, `config/nushell/config.nu`, `config/nushell/env.nu`, `config/wezterm/wezterm.lua`, `config/git/config`, `config/git/ignore` です.
 
 ## 前提
 
 - Git
 - Nushell (`nu`)
+- WezTerm (`wezterm`) (利用する場合)
+- `curl` または `wget` (フォントのダウンロードに使用します)
+- `7z` / `7zz` / `7zr` / `unar` のいずれか (`.7z` 展開に使用します)
+- `fc-cache` (fontconfig, フォントキャッシュ更新に使用します)
 
 ## 導入手順
 
@@ -23,12 +28,20 @@ chmod +x install.sh
 
 - `config/nushell/config.nu` を `~/.config/nushell/config.nu` にリンクします.
 - `config/nushell/env.nu` を `~/.config/nushell/env.nu` にリンクします.
+- `config/wezterm/wezterm.lua` を `~/.config/wezterm/wezterm.lua` にリンクします.
 - `config/git/config` を `~/.config/git/config` にリンクします.
 - `config/git/ignore` を `~/.config/git/ignore` にリンクします.
+- `https://ftp.iij.ad.jp/pub/osdn.jp/users/8/8598/rounded-mgenplus-20150602.7z` をダウンロードし, `rounded-mgenplus-1m-regular.ttf` を `~/.local/share/fonts/rounded-mgenplus/` (または `XDG_DATA_HOME/fonts/rounded-mgenplus/`) へ配置します.
+- `fc-cache` を実行してフォントキャッシュを更新します.
 - `~/.gitconfig` が symlink の場合は退避し, ローカルファイルとして再作成します.
 - `~/.gitconfig` に `~/.config/git/config` と `~/.gitconfig.local` の `include.path` を設定します.
 - 既存ファイルがある場合は `*.bak.<timestamp>` へ退避します.
 - 同一リンク済みの場合は変更せずスキップします.
+
+## WezTerm フォント
+
+`config/wezterm/wezterm.lua` では, `Rounded Mgen+ 1m` を使用する設定にしています.
+このフォント本体は `install.sh` が Linux のユーザーデータ領域へ配置します.
 
 ## Git の個人情報分離
 
@@ -50,12 +63,16 @@ git config --file ~/.gitconfig.local user.email "you@example.com"
 
 ```bash
 ls -l ~/.config/nushell/config.nu ~/.config/nushell/env.nu
+ls -l ~/.config/wezterm/wezterm.lua
 ls -l ~/.config/git/config ~/.config/git/ignore
+ls -l ~/.local/share/fonts/rounded-mgenplus/rounded-mgenplus-1m-regular.ttf
+fc-list | grep -F "Rounded Mgen+ 1m"
 nu -i -c 'exit'
+wezterm ls-fonts --text "abc"
 git config --get core.excludesfile
 git config --show-origin --get-all include.path
 git check-ignore -v .github/copilot-instructions.md
 git config --global --list --show-origin
 ```
 
-`nu` 起動時に設定読込エラーが出ないこと, `core.excludesfile` に `~/.config/git/ignore` が表示されること, `include.path` に `~/.config/git/config` と `~/.gitconfig.local` が表示されること, `~/.gitconfig` / `~/.gitconfig.local` が読み込まれていることを確認してください.
+`nu` 起動時に設定読込エラーが出ないこと, WezTerm 設定ファイルのリンクが作成されること, `Rounded Mgen+ 1m` が fontconfig と WezTerm から参照できること, `core.excludesfile` に `~/.config/git/ignore` が表示されること, `include.path` に `~/.config/git/config` と `~/.gitconfig.local` が表示されること, `~/.gitconfig` / `~/.gitconfig.local` が読み込まれていることを確認してください.
