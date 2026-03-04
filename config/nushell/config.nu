@@ -6,6 +6,9 @@
 # 例: 次のような設定がある場合です.
 #   $env.config = ($env.config | upsert hooks.pre_prompt [ {|| ls } ])
 #
+# ログイン時の Welcome バナーを表示しないようにします.
+$env.config = ($env.config | upsert show_banner false)
+#
 # ls を停止するには, pre_prompt から ls の hook のみを除去します.
 let pre_prompt_hooks = ($env.config.hooks.pre_prompt? | default [])
 let filtered_hooks = ($pre_prompt_hooks | where {|hook|
