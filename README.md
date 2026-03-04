@@ -2,18 +2,15 @@
 
 ## 目的
 
-このリポジトリーは, Nushell, WezTerm, Git の設定を symlink で管理します.
-あわせて, WezTerm 用フォント `rounded-mgenplus-1m-regular.ttf` を自動配置します.
-現在の対象は, `config/nushell/config.nu`, `config/nushell/env.nu`, `config/wezterm/wezterm.lua`, `config/git/config`, `config/git/ignore` です.
+このリポジトリーは, ホームディレクトリー直下と `~/.config` 配下の設定ファイルを symlink で管理し, 複数 PC で同一状態を再現できるようにします.
+`install.sh` でリンク作成と既存ファイルの退避を自動化し, 手動作業による事故を減らします.
 
 ## 前提
 
-- Git
-- Nushell (`nu`)
-- WezTerm (`wezterm`) (利用する場合)
-- `curl` または `wget` (フォントのダウンロードに使用します)
-- `7z` / `7zz` / `7zr` / `unar` のいずれか (`.7z` 展開に使用します)
-- `fc-cache` (fontconfig, フォントキャッシュ更新に使用します)
+Linux を想定します.
+
+導入には Git が必要です. `install.sh` は bash で動作します.
+追加で必要なコマンドがある場合は, `install.sh` が不足をエラーメッセージとして表示して終了します.
 
 ## 導入手順
 
@@ -26,28 +23,26 @@ chmod +x install.sh
 
 ## `install.sh` の動作
 
-- `config/nushell/config.nu` を `~/.config/nushell/config.nu` にリンクします.
-- `config/nushell/env.nu` を `~/.config/nushell/env.nu` にリンクします.
-- `config/wezterm/wezterm.lua` を `~/.config/wezterm/wezterm.lua` にリンクします.
-- `config/git/config` を `~/.config/git/config` にリンクします.
-- `config/git/ignore` を `~/.config/git/ignore` にリンクします.
-- `https://ftp.iij.ad.jp/pub/osdn.jp/users/8/8598/rounded-mgenplus-20150602.7z` をダウンロードし, `rounded-mgenplus-1m-regular.ttf` を `~/.local/share/fonts/rounded-mgenplus/` (または `XDG_DATA_HOME/fonts/rounded-mgenplus/`) へ配置します.
-- `fc-cache` を実行してフォントキャッシュを更新します.
-- `~/.gitconfig` が symlink の場合は退避し, ローカルファイルとして再作成します.
-- `~/.gitconfig` に `~/.config/git/config` と `~/.gitconfig.local` の `include.path` を設定します.
-- 既存ファイルがある場合は `*.bak.<timestamp>` へ退避します.
-- 同一リンク済みの場合は変更せずスキップします.
+- `~/dotfiles` 配下の設定ファイルを, `$HOME` 配下へ symlink で反映します.
+- 既存ファイルがある場合は, `*.bak.<timestamp>` へ退避してからリンクします.
+- 同一リンク済みの場合は変更せず, `already linked:` としてスキップします.
+- 外部リソース (フォントなど) をダウンロードして配置する場合があります.
+- ローカル専用の設定を混入させないため, 一部は symlink ではなく include 構成で反映します.
 
-## WezTerm フォント
+## 秘密情報とローカル差分
 
-`config/wezterm/wezterm.lua` では, `Rounded Mgen+ 1m` を使用する設定にしています.
-このフォント本体は `install.sh` が Linux のユーザーデータ領域へ配置します.
+このリポジトリーでは, 秘密情報や個人情報は管理しません.
+各 PC 固有の値は, ローカルファイルに分離して運用します.
 
-## Git の個人情報分離
-
-`user.name` と `user.email` は `~/.gitconfig.local` に分離します.
+例として, Git の個人情報 (`user.name`, `user.email`) は, `~/.gitconfig.local` に分離します.
 このファイルは git 管理しません.
-`install.sh` は `~/.gitconfig` をローカル専用ファイルとして扱い, `include.path` だけを設定します.
+
+`install.sh` は `~/.gitconfig` をローカルファイルとして扱い, 次の include を設定します (共有設定とローカル差分の分離).
+
+- `~/.config/git/config`
+- `~/.gitconfig.local`
+
+初回セットアップ例を以下に示します.
 
 ```bash
 cp ~/dotfiles/home/.gitconfig.local.example ~/.gitconfig.local
@@ -55,24 +50,14 @@ git config --file ~/.gitconfig.local user.name "YOUR_NAME"
 git config --file ~/.gitconfig.local user.email "you@example.com"
 ```
 
-`git config --global user.name ...` と `git config --global user.email ...` は `~/.gitconfig` へ書き込まれます.
-共有設定は `~/.config/git/config` で管理されるため, `~/.gitconfig` に個人情報が追記されても dotfiles 管理対象へ混入しません.
-`~/.gitconfig.local` へ明示的に書き込む場合は, `--file ~/.gitconfig.local` を使用します.
+`git config --global ...` は `~/.gitconfig` へ書き込まれるため, `~/.gitconfig.local` へ書き込みたい場合は `--file ~/.gitconfig.local` を使用してください.
 
 ## 反映確認
 
 ```bash
-ls -l ~/.config/nushell/config.nu ~/.config/nushell/env.nu
-ls -l ~/.config/wezterm/wezterm.lua
-ls -l ~/.config/git/config ~/.config/git/ignore
-ls -l ~/.local/share/fonts/rounded-mgenplus/rounded-mgenplus-1m-regular.ttf
-fc-list | grep -F "Rounded Mgen+ 1m"
-nu -i -c 'exit'
-wezterm ls-fonts --text "abc"
-git config --get core.excludesfile
-git config --show-origin --get-all include.path
-git check-ignore -v .github/copilot-instructions.md
-git config --global --list --show-origin
+./install.sh
+# 2 回目以降の実行で `already linked:` が増えることを確認します.
+./install.sh
 ```
 
-`nu` 起動時に設定読込エラーが出ないこと, WezTerm 設定ファイルのリンクが作成されること, `Rounded Mgen+ 1m` が fontconfig と WezTerm から参照できること, `core.excludesfile` に `~/.config/git/ignore` が表示されること, `include.path` に `~/.config/git/config` と `~/.gitconfig.local` が表示されること, `~/.gitconfig` / `~/.gitconfig.local` が読み込まれていることを確認してください.
+1 回目の実行で `linked:` が出力され, 2 回目以降の実行で同一リンク済みの項目が `already linked:` としてスキップされることを確認してください.
