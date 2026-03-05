@@ -9,6 +9,8 @@ local shell_definitions = {
 }
 -- シェル候補の表示順を固定する.
 local shell_order = { 'nu', 'bash' }
+-- シェル選択ランチャーのタイトルを統一する.
+local shell_selector_title = 'Select shell'
 
 -- 新規タブや新規ペインで起動する既定のプログラムを設定する.
 -- ここでは Nushell を既定にし, `exec nu -l` のようなコマンド文字列が画面に残る実装を避けます.
@@ -30,37 +32,44 @@ local function pane_shell_args(shell_id)
   return definition and definition.args or nil
 end
 
--- ペイン分割時にシェルを選択するランチャーアクションを返す.
-local function split_pane_with_shell_selector(direction)
-  return wezterm.action.PromptInputLine {
-    -- 画面全体のランチャー UI を避け, 小さな入力欄で選択できるようにします.
-    description = '新しいペインで起動するシェルを選択してください (n = nu, b = bash). 空入力は nu です.',
-    action = wezterm.action_callback(function(window, pane, line)
-      if not line then
+-- 新規タブ作成時のシェル候補を `shell_order` に従って生成します.
+local function launch_menu_items()
+  local items = {}
+  for _, shell_id in ipairs(shell_order) do
+    local definition = shell_definitions[shell_id]
+    table.insert(items, { label = definition.label, args = definition.args })
+  end
+  return items
+end
+
+-- `InputSelector` によるシェル選択アクションを生成する.
+local function shell_selector_action(on_selected)
+  return wezterm.action.InputSelector {
+    title = shell_selector_title,
+    choices = pane_shell_choices(),
+    action = wezterm.action_callback(function(window, pane, id, label)
+      if not id then
         return
       end
 
-      local normalized = (line:gsub('^%s*(.-)%s*$', '%1')):lower()
-      local shell_id
-      if normalized == '' or normalized == 'n' or normalized == 'nu' then
-        shell_id = 'nu'
-      elseif normalized == 'b' or normalized == 'bash' then
-        shell_id = 'bash'
-      else
-        return
-      end
-
-      local args = pane_shell_args(shell_id)
+      local args = pane_shell_args(id)
       if not args then
         return
       end
 
-      pane:split {
-        direction = direction,
-        args = args,
-      }
+      on_selected(window, pane, args, id, label)
     end),
   }
+end
+
+-- ペイン分割時にシェルを選択するランチャーアクションを返す.
+local function split_pane_with_shell_selector(direction)
+  return shell_selector_action(function(_, pane, args)
+    pane:split {
+      direction = direction,
+      args = args,
+    }
+  end)
 end
 
 -- GUI 起動時に最初のウィンドウを作成し, 初期ペインのシェルを選択させる.
@@ -77,29 +86,20 @@ wezterm.on('gui-startup', function(cmd)
 
   local _, pane, window = wezterm.mux.spawn_window(spawn_cmd)
   window:gui_window():perform_action(
-    wezterm.action.InputSelector {
-      title = 'Select shell for first tab',
-      choices = pane_shell_choices(),
-      action = wezterm.action_callback(function(active_window, active_pane, id)
-        if id == 'nu' then
-          return
-        end
+    shell_selector_action(function(active_window, active_pane, args, id)
+      if id == 'nu' then
+        return
+      end
 
-        local args = pane_shell_args(id)
-        if not args then
-          return
-        end
-
-        active_window:perform_action(
-          wezterm.action.SpawnCommandInNewTab { args = args },
-          active_pane
-        )
-        active_window:perform_action(
-          wezterm.action.CloseCurrentTab { confirm = false },
-          active_pane
-        )
-      end),
-    },
+      active_window:perform_action(
+        wezterm.action.SpawnCommandInNewTab { args = args },
+        active_pane
+      )
+      active_window:perform_action(
+        wezterm.action.CloseCurrentTab { confirm = false },
+        active_pane
+      )
+    end),
     pane
   )
 end)
@@ -145,12 +145,7 @@ config.mouse_wheel_scrolls_tabs = false
 config.notification_handling = 'NeverShow'
 
 -- 新規タブ作成時に選択できるシェル候補を設定する.
-config.launch_menu = {
-  -- 新規タブを Nushell で起動する候補を追加する.
-  { label = shell_definitions.nu.label, args = shell_definitions.nu.args },
-  -- 新規タブを Bash で起動する候補を追加する.
-  { label = shell_definitions.bash.label, args = shell_definitions.bash.args },
-}
+config.launch_menu = launch_menu_items()
 
 -- キー操作を設定する.
 config.keys = {
@@ -180,87 +175,73 @@ config.keys = {
     mods = 'SHIFT',
     action = wezterm.action.CloseCurrentTab { confirm = true },
   },
-  -- Ctrl + Shift + RightArrow で右側にペインを分割する操作を設定する.
-  {
-    key = 'RightArrow',
-    mods = 'CTRL|SHIFT',
-    action = split_pane_with_shell_selector 'Right',
-  },
-  -- Ctrl + Shift + LeftArrow で左側にペインを分割する操作を設定する.
-  {
-    key = 'LeftArrow',
-    mods = 'CTRL|SHIFT',
-    action = split_pane_with_shell_selector 'Left',
-  },
-  -- Ctrl + Shift + UpArrow で上側にペインを分割する操作を設定する.
-  {
-    key = 'UpArrow',
-    mods = 'CTRL|SHIFT',
-    action = split_pane_with_shell_selector 'Top',
-  },
-  -- Ctrl + Shift + DownArrow で下側にペインを分割する操作を設定する.
-  {
-    key = 'DownArrow',
-    mods = 'CTRL|SHIFT',
-    action = split_pane_with_shell_selector 'Bottom',
-  },
-  -- Ctrl + S を無効化し, 誤操作による端末出力停止 (XOFF) を防ぐ操作を設定する.
-  -- この設定により, 端末内アプリケーションへ Ctrl + S が送られなくなります.
-  {
-    key = 's',
-    mods = 'CTRL',
-    action = wezterm.action_callback(function(_, _)
-      -- 意図的に何もしません.
-    end),
-  },
-  -- Alt + Ctrl + LeftArrow で左方向にペインサイズを調整する操作を設定する.
-  {
-    key = 'LeftArrow',
-    mods = 'CTRL|ALT',
-    action = wezterm.action.AdjustPaneSize { 'Left', 1 },
-  },
-  -- Alt + Ctrl + RightArrow で右方向にペインサイズを調整する操作を設定する.
-  {
-    key = 'RightArrow',
-    mods = 'CTRL|ALT',
-    action = wezterm.action.AdjustPaneSize { 'Right', 1 },
-  },
-  -- Alt + Ctrl + UpArrow で上方向にペインサイズを調整する操作を設定する.
-  {
-    key = 'UpArrow',
-    mods = 'CTRL|ALT',
-    action = wezterm.action.AdjustPaneSize { 'Up', 1 },
-  },
-  -- Alt + Ctrl + DownArrow で下方向にペインサイズを調整する操作を設定する.
-  {
-    key = 'DownArrow',
-    mods = 'CTRL|ALT',
-    action = wezterm.action.AdjustPaneSize { 'Down', 1 },
-  },
-  -- Ctrl + q で現在のペインを閉じる操作を設定する.
-  -- `confirm = true` の場合でも, ペイン内プロセスが "bash" や "nu" など既定の
-  -- `skip_close_confirmation_for_processes_named` に該当すると, 確認表示が省略される場合があります.
-  {
-    key = 'q',
-    mods = 'CTRL',
-    action = wezterm.action.CloseCurrentPane { confirm = true },
-  },
-  -- ctrl + f で現在のペインのズーム表示を切り替える操作を設定する.
-  {
-    key = 'f',
-    mods = 'CTRL',
-    action = wezterm.action.TogglePaneZoomState,
-  },
-  -- Ctrl + j でペイン選択のオーバーレイを表示する操作を設定する.
-  {
-    key = 'j',
-    mods = 'CTRL',
-    -- ペイン上にラベルを表示し, 入力したラベルのペインへフォーカスを移動します. キャンセルは Esc です.
-    action = wezterm.action.PaneSelect {
-      alphabet = 'uijknm',
-    },
-  },
 }
+
+-- Ctrl + Shift + Arrow でペイン分割ランチャーを表示する操作を設定する.
+local split_pane_bindings = {
+  { key = 'RightArrow', direction = 'Right' },
+  { key = 'LeftArrow', direction = 'Left' },
+  { key = 'UpArrow', direction = 'Top' },
+  { key = 'DownArrow', direction = 'Bottom' },
+}
+for _, binding in ipairs(split_pane_bindings) do
+  table.insert(config.keys, {
+    key = binding.key,
+    mods = 'CTRL|SHIFT',
+    action = split_pane_with_shell_selector(binding.direction),
+  })
+end
+
+-- Ctrl + S を無効化し, 誤操作による端末出力停止 (XOFF) を防ぐ操作を設定する.
+-- この設定により, 端末内アプリケーションへ Ctrl + S が送られなくなります.
+table.insert(config.keys, {
+  key = 's',
+  mods = 'CTRL',
+  action = wezterm.action_callback(function(_, _)
+    -- 意図的に何もしません.
+  end),
+})
+
+-- Alt + Ctrl + Arrow でペインサイズを調整する操作を設定する.
+local adjust_pane_size_bindings = {
+  { key = 'LeftArrow', direction = 'Left' },
+  { key = 'RightArrow', direction = 'Right' },
+  { key = 'UpArrow', direction = 'Up' },
+  { key = 'DownArrow', direction = 'Down' },
+}
+for _, binding in ipairs(adjust_pane_size_bindings) do
+  table.insert(config.keys, {
+    key = binding.key,
+    mods = 'CTRL|ALT',
+    action = wezterm.action.AdjustPaneSize { binding.direction, 1 },
+  })
+end
+
+-- Ctrl + q で現在のペインを閉じる操作を設定する.
+-- `confirm = true` の場合でも, ペイン内プロセスが "bash" や "nu" など既定の
+-- `skip_close_confirmation_for_processes_named` に該当すると, 確認表示が省略される場合があります.
+table.insert(config.keys, {
+  key = 'q',
+  mods = 'CTRL',
+  action = wezterm.action.CloseCurrentPane { confirm = true },
+})
+
+-- ctrl + f で現在のペインのズーム表示を切り替える操作を設定する.
+table.insert(config.keys, {
+  key = 'f',
+  mods = 'CTRL',
+  action = wezterm.action.TogglePaneZoomState,
+})
+
+-- Ctrl + j でペイン選択のオーバーレイを表示する操作を設定する.
+table.insert(config.keys, {
+  key = 'j',
+  mods = 'CTRL',
+  -- ペイン上にラベルを表示し, 入力したラベルのペインへフォーカスを移動します. キャンセルは Esc です.
+  action = wezterm.action.PaneSelect {
+    alphabet = 'uijknm',
+  },
+})
 
 -- スクロール周りを設定する.
 -- スクロールバック履歴の保持行数を設定する.
