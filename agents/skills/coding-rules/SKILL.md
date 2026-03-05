@@ -1,6 +1,6 @@
 ---
 name: coding-rules
-description: 常にこのファイルの配下にあるコーディング規則に従う
+description: 文章やプログラムを書く際は, 常にこのファイルの配下にあるコーディング規則に従う
 metadata:
   short-description: リポジトリー全体で適用する記述, 実装の規則.
 ---
@@ -10,7 +10,7 @@ metadata:
 
 参照規則は次の通りです.
 
-- [japanese_writing_rule.md](./references/japanese_writing_rule.md): 日本語を書く際の要項を示します.
+- [japanese_writing_rule.md](./references/japanese_writing_rule.md): 日本語を書く際の要項を示します. ドキュメント, 仕様書, コメント, Git のコミットメッセージ, チャットの返答など, 日本語を記述するあらゆる場面において, このルールに従って記述してください.
 - [cpp_coding_rule.md](./references/cpp_coding_rule.md): C++ のコードを書く際のコーディングルールを示します.
 - [rust_coding_rule.md](./references/rust_coding_rule.md): Rust のコードを書く際のコーディングルールを示します.
 
