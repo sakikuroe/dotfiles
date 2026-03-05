@@ -1,0 +1,4 @@
+interface:
+  display_name: "Coding Rules"
+  short_description: "Apply repository coding and writing rules"
+  default_prompt: "Use $coding-rules to apply repository coding and writing rules."
