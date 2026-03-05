@@ -161,9 +161,9 @@ config.keys = {
     mods = 'SHIFT',
     action = wezterm.action.ActivateTabRelative(1),
   },
-  -- Shift + Enter で新規タブ作成用のシェル選択ランチャーを表示する操作を設定する.
+  -- Shift + Space で新規タブ作成用のシェル選択ランチャーを表示する操作を設定する.
   {
-    key = 'Enter',
+    key = 'Space',
     mods = 'SHIFT',
     action = wezterm.action.ShowLauncherArgs { flags = 'LAUNCH_MENU_ITEMS' },
   },
