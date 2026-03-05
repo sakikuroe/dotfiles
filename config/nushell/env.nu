@@ -4,6 +4,11 @@
 #   1 行目: [HH:MM:SS] <pwd(~置換)> <git-branch(あれば)>
 #   2 行目: >>> (入力インジケーター)
 
+# `~/.bashrc` の `export PATH="$HOME/.npm-global/bin:$PATH"` を `nu` でも再現します.
+# `codex` は npm global に入るため, 先頭へ配置して優先的に解決します.
+let npm_global_bin = ($nu.home-dir | path join ".npm-global" "bin" | path expand)
+$env.PATH = ($env.PATH | where {|it| ($it | path expand) != $npm_global_bin } | prepend $npm_global_bin)
+
 # PWD をホーム配下の場合は "~" に置換して返します.
 def pretty_pwd [] {
   let home = $nu.home-dir
