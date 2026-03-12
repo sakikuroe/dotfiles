@@ -242,3 +242,40 @@ pub fn generate(n: usize) -> Vec<u64> {
 
     primes
 }
+```
+
+```rust
+//! 郵送先情報を扱うためのデータ構造を提供するモジュール.
+//!
+//! このモジュールは, 住所を表す構造体と, その住所を含む配送先情報の構造体を定義する.
+//! 単一の責務を持つ小さな構造体を組み合わせることで, 意味の明確なデータ表現を実現する.
+
+/// 郵送先の住所を表す.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Address {
+    /// 都道府県名.
+    prefecture: String,
+
+    /// 市区町村名.
+    city: String,
+
+    /// 番地, 建物名, 部屋番号などを含む詳細な住所.
+    street_address: String,
+
+    /// 郵便番号.
+    postal_code: String,
+}
+
+/// 荷物の配送先情報を表す.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ShippingLabel {
+    /// 受取人の氏名.
+    recipient_name: String,
+
+    /// 宛先として使用する住所.
+    destination: Address,
+
+    /// 配達時に参照する連絡先電話番号.
+    phone_number: String,
+}
+```
