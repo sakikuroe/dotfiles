@@ -167,11 +167,11 @@ config.keys = {
     mods = 'SHIFT',
     action = wezterm.action.ShowLauncherArgs { flags = 'LAUNCH_MENU_ITEMS' },
   },
-  -- Shift + Backspace で現在のタブを閉じる操作を設定する.
+  -- Shift + Delete で現在のタブを閉じる操作を設定する.
   -- `confirm = true` の場合でも, タブ内プロセスが "bash" や "nu" など既定の
   -- `skip_close_confirmation_for_processes_named` に該当すると, 確認表示が省略される場合があります.
   {
-    key = 'Backspace',
+    key = 'phys:Delete',
     mods = 'SHIFT',
     action = wezterm.action.CloseCurrentTab { confirm = true },
   },
