@@ -9,7 +9,7 @@
 # ログイン時の Welcome バナーを表示しないようにします.
 $env.config = ($env.config | upsert show_banner false)
 
-# 補完メニューを縦並びの `list` レイアウトへ明示的に切り替えます.
+# 補完メニューを `columnar` レイアウトへ明示的に切り替えます.
 # 既定の `completion_menu` を上書きし, 今後の見た目調整もしやすくします.
 let configured_menus = ($env.config.menus? | default [] | where {|menu| $menu.name != "completion_menu" })
 $env.config = ($env.config | upsert menus (
@@ -18,8 +18,10 @@ $env.config = ($env.config | upsert menus (
     only_buffer_difference: false
     marker: "| "
     type: {
-      layout: list
-      page_size: 10
+      layout: columnar
+      columns: 4
+      col_width: 20
+      col_padding: 2
     }
     style: {
       text: green
