@@ -9,6 +9,26 @@
 # ログイン時の Welcome バナーを表示しないようにします.
 $env.config = ($env.config | upsert show_banner false)
 
+# 補完メニューを縦並びの `list` レイアウトへ明示的に切り替えます.
+# 既定の `completion_menu` を上書きし, 今後の見た目調整もしやすくします.
+let configured_menus = ($env.config.menus? | default [] | where {|menu| $menu.name != "completion_menu" })
+$env.config = ($env.config | upsert menus (
+  $configured_menus ++ [{
+    name: completion_menu
+    only_buffer_difference: false
+    marker: "| "
+    type: {
+      layout: list
+      page_size: 10
+    }
+    style: {
+      text: green
+      selected_text: green_reverse
+      description_text: yellow
+    }
+  }]
+))
+
 # `fish` が利用できる環境では, 外部コマンド補完を `fish` に委譲します.
 # `fish` がない環境では, 既存の補完設定をそのまま使います.
 if not ((which fish) | is-empty) {
