@@ -8,6 +8,45 @@
 #
 # ログイン時の Welcome バナーを表示しないようにします.
 $env.config = ($env.config | upsert show_banner false)
+
+# `fish` が利用できる環境では, 外部コマンド補完を `fish` に委譲します.
+# `fish` がない環境では, 既存の補完設定をそのまま使います.
+if not ((which fish) | is-empty) {
+  let fish_completer = {|spans|
+    let escaped_spans = ($spans | str replace --all "'" "\\'" | str join " ")
+    let fish_command = $"complete '--do-complete=($escaped_spans)'"
+
+    fish --command $fish_command
+    | from tsv --flexible --noheaders --no-infer
+    | rename value description
+    | update value {|row|
+      let value = $row.value
+      let needs_quote = (
+        [' ' '[' ']' '(' ')' "'" '"' '`']
+        | any {|char| $value | str contains $char }
+      )
+
+      if ($needs_quote and ($value | path exists)) {
+        let expanded_path = if ($value | str starts-with "~") {
+          $value | path expand --no-symlink
+        } else {
+          $value
+        }
+        $'"($expanded_path | str replace --all "\"" "\\\"")"'
+      } else {
+        $value
+      }
+    }
+  }
+
+  let external_completions = (
+    $env.config.completions.external
+    | upsert enable true
+    | merge { completer: $fish_completer }
+  )
+
+  $env.config = ($env.config | upsert completions.external $external_completions)
+}
 #
 # ls を停止するには, pre_prompt から ls の hook のみを除去します.
 let pre_prompt_hooks = ($env.config.hooks.pre_prompt? | default [])
