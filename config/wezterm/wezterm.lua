@@ -168,6 +168,20 @@ local function podman_context_for_pane(pane)
   return podman_context_from_user_vars(pane) or podman_context_from_foreground_process(pane)
 end
 
+-- Podman 内では, login shell の PATH を使って目的の shell を解決する.
+local function wrapped_shell_args_for_podman(shell_args)
+  local wrapped_args = {
+    'bash',
+    '-lc',
+    'target="$1"; shift; command -v "$target" >/dev/null 2>&1 || { printf "Shell not found in container: %s\\n" "$target" >&2; exec bash -l; }; exec "$target" "$@"',
+    'bash',
+  }
+  for _, arg in ipairs(shell_args) do
+    table.insert(wrapped_args, arg)
+  end
+  return wrapped_args
+end
+
 -- 現在の pane 文脈に応じたシェル起動引数を返す.
 local function spawn_args_for_shell(pane, shell_args)
   local args = copy_args(shell_args)
@@ -187,6 +201,8 @@ local function spawn_args_for_shell(pane, shell_args)
   end
 
   table.insert(podman_args, '-e')
+  table.insert(podman_args, 'TERM_PROGRAM=WezTerm')
+  table.insert(podman_args, '-e')
   table.insert(podman_args, podman_user_var_names.active .. '=1')
   table.insert(podman_args, '-e')
   table.insert(podman_args, podman_user_var_names.container .. '=' .. podman_context.container)
@@ -196,7 +212,7 @@ local function spawn_args_for_shell(pane, shell_args)
   end
 
   table.insert(podman_args, podman_context.container)
-  for _, arg in ipairs(args) do
+  for _, arg in ipairs(wrapped_shell_args_for_podman(args)) do
     table.insert(podman_args, arg)
   end
 
