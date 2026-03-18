@@ -11,6 +11,12 @@ local shell_definitions = {
 local shell_order = { 'nu', 'bash' }
 -- シェル選択ランチャーのタイトルを統一する.
 local shell_selector_title = 'Select shell'
+-- Podman 文脈を受け渡す user var 名を統一する.
+local podman_user_var_names = {
+  active = 'DOTFILES_PODMAN_ACTIVE',
+  container = 'DOTFILES_PODMAN_CONTAINER',
+  cwd = 'DOTFILES_PODMAN_CWD',
+}
 
 -- 新規タブや新規ペインで起動する既定のプログラムを設定する.
 -- ここでは Nushell を既定にし, `exec nu -l` のようなコマンド文字列が画面に残る実装を避けます.
@@ -32,14 +38,174 @@ local function pane_shell_args(shell_id)
   return definition and definition.args or nil
 end
 
--- 新規タブ作成時のシェル候補を `shell_order` に従って生成します.
-local function launch_menu_items()
-  local items = {}
-  for _, shell_id in ipairs(shell_order) do
-    local definition = shell_definitions[shell_id]
-    table.insert(items, { label = definition.label, args = definition.args })
+-- 引数配列を複製する.
+local function copy_args(args)
+  local copied = {}
+  for index, arg in ipairs(args or {}) do
+    copied[index] = arg
   end
-  return items
+  return copied
+end
+
+-- 実行ファイルパスからベース名だけを取り出す.
+local function basename(path)
+  if not path or #path == 0 then
+    return nil
+  end
+
+  return path:match('([^/]+)$') or path
+end
+
+-- user vars に保存された Podman 文脈を読み取る.
+local function podman_context_from_user_vars(pane)
+  local user_vars = pane:get_user_vars() or {}
+  if user_vars[podman_user_var_names.active] ~= '1' then
+    return nil
+  end
+
+  local container = user_vars[podman_user_var_names.container]
+  if not container or #container == 0 then
+    return nil
+  end
+
+  local cwd = user_vars[podman_user_var_names.cwd]
+  if cwd and #cwd == 0 then
+    cwd = nil
+  end
+
+  return { container = container, cwd = cwd }
+end
+
+-- `podman exec` の引数列からコンテナー名と作業ディレクトリーを抽出する.
+local function parse_podman_exec_context(argv)
+  local exec_index = nil
+  for index, arg in ipairs(argv or {}) do
+    if arg == 'exec' then
+      exec_index = index
+      break
+    end
+  end
+  if not exec_index then
+    return nil
+  end
+
+  local context = {}
+  local index = exec_index + 1
+  while index <= #argv do
+    local arg = argv[index]
+
+    if arg == '--' then
+      index = index + 1
+    elseif arg == '-w' or arg == '--workdir' then
+      context.cwd = argv[index + 1]
+      index = index + 2
+    elseif arg:match('^%-%-workdir=') then
+      context.cwd = arg:match('^%-%-workdir=(.*)$')
+      index = index + 1
+    elseif arg == '-e'
+      or arg == '--env'
+      or arg == '--env-file'
+      or arg == '-u'
+      or arg == '--user'
+      or arg == '--detach-keys'
+      or arg == '--preserve-fds' then
+      index = index + 2
+    elseif arg:match('^%-%-env=')
+      or arg:match('^%-%-env%-file=')
+      or arg:match('^%-%-user=')
+      or arg:match('^%-%-detach%-keys=')
+      or arg:match('^%-%-preserve%-fds=') then
+      index = index + 1
+    elseif arg == '-i'
+      or arg == '-t'
+      or arg == '-it'
+      or arg == '-ti'
+      or arg == '-l'
+      or arg == '--interactive'
+      or arg == '--tty'
+      or arg == '--latest'
+      or arg == '--privileged'
+      or arg:match('^%-[%a][%a]+$') then
+      index = index + 1
+    elseif arg:sub(1, 1) == '-' then
+      index = index + 1
+    else
+      context.container = arg
+      break
+    end
+  end
+
+  if not context.container or #context.container == 0 then
+    return nil
+  end
+
+  if context.cwd and #context.cwd == 0 then
+    context.cwd = nil
+  end
+
+  return context
+end
+
+-- foreground process が `podman exec` なら, その引数から文脈を推定する.
+local function podman_context_from_foreground_process(pane)
+  local process_info = pane:get_foreground_process_info()
+  if not process_info then
+    return nil
+  end
+
+  local executable = basename(process_info.executable or '')
+  local argv = process_info.argv or {}
+  local first_arg = basename(argv[1] or '')
+  if executable ~= 'podman' and first_arg ~= 'podman' then
+    return nil
+  end
+
+  return parse_podman_exec_context(argv)
+end
+
+-- Podman 内であれば, 同じコンテナーへ入り直すための情報を返す.
+local function podman_context_for_pane(pane)
+  return podman_context_from_user_vars(pane) or podman_context_from_foreground_process(pane)
+end
+
+-- 現在の pane 文脈に応じたシェル起動引数を返す.
+local function spawn_args_for_shell(pane, shell_args)
+  local args = copy_args(shell_args)
+  if not pane then
+    return args
+  end
+
+  local podman_context = podman_context_for_pane(pane)
+  if not podman_context then
+    return args
+  end
+
+  local podman_args = { 'podman', 'exec', '-it' }
+  if podman_context.cwd then
+    table.insert(podman_args, '-w')
+    table.insert(podman_args, podman_context.cwd)
+  end
+
+  table.insert(podman_args, '-e')
+  table.insert(podman_args, podman_user_var_names.active .. '=1')
+  table.insert(podman_args, '-e')
+  table.insert(podman_args, podman_user_var_names.container .. '=' .. podman_context.container)
+  if podman_context.cwd then
+    table.insert(podman_args, '-e')
+    table.insert(podman_args, podman_user_var_names.cwd .. '=' .. podman_context.cwd)
+  end
+
+  table.insert(podman_args, podman_context.container)
+  for _, arg in ipairs(args) do
+    table.insert(podman_args, arg)
+  end
+
+  return podman_args
+end
+
+-- `SpawnCommand` 互換のテーブルを構築する.
+local function spawn_command_for_shell(pane, shell_args)
+  return { args = spawn_args_for_shell(pane, shell_args) }
 end
 
 -- `InputSelector` によるシェル選択アクションを生成する.
@@ -64,11 +230,28 @@ end
 
 -- ペイン分割時にシェルを選択するランチャーアクションを返す.
 local function split_pane_with_shell_selector(direction)
-  return shell_selector_action(function(_, pane, args)
+  return shell_selector_action(function(_, pane, shell_args)
     pane:split {
       direction = direction,
-      args = args,
+      args = spawn_args_for_shell(pane, shell_args),
     }
+  end)
+end
+
+-- 新規タブ作成時にシェルを選択するランチャーアクションを返す.
+local function new_tab_with_shell_selector()
+  return shell_selector_action(function(window, pane, shell_args)
+    window:perform_action(
+      wezterm.action.SpawnCommandInNewTab(spawn_command_for_shell(pane, shell_args)),
+      pane
+    )
+  end)
+end
+
+-- 新規ウィンドウ作成時にシェルを選択するランチャーアクションを返す.
+local function new_window_with_shell_selector()
+  return shell_selector_action(function(_, pane, shell_args)
+    wezterm.mux.spawn_window(spawn_command_for_shell(pane, shell_args))
   end)
 end
 
@@ -86,13 +269,13 @@ wezterm.on('gui-startup', function(cmd)
 
   local _, pane, window = wezterm.mux.spawn_window(spawn_cmd)
   window:gui_window():perform_action(
-    shell_selector_action(function(active_window, active_pane, args, id)
+    shell_selector_action(function(active_window, active_pane, shell_args, id)
       if id == 'nu' then
         return
       end
 
       active_window:perform_action(
-        wezterm.action.SpawnCommandInNewTab { args = args },
+        wezterm.action.SpawnCommandInNewTab(spawn_command_for_shell(active_pane, shell_args)),
         active_pane
       )
       active_window:perform_action(
@@ -144,9 +327,6 @@ config.mouse_wheel_scrolls_tabs = false
 -- ここでは通知を表示しないことで, 意図しないポップアップを防ぎます.
 config.notification_handling = 'NeverShow'
 
--- 新規タブ作成時に選択できるシェル候補を設定する.
-config.launch_menu = launch_menu_items()
-
 -- キー操作を設定する.
 config.keys = {
   -- Shift + LeftArrow で左のタブへ移動する操作を設定する.
@@ -165,7 +345,55 @@ config.keys = {
   {
     key = 'Space',
     mods = 'SHIFT',
-    action = wezterm.action.ShowLauncherArgs { flags = 'LAUNCH_MENU_ITEMS' },
+    action = new_tab_with_shell_selector(),
+  },
+  -- Ctrl + t で新規タブ作成用のシェル選択ランチャーを表示する操作を設定する.
+  {
+    key = 't',
+    mods = 'CTRL',
+    action = new_tab_with_shell_selector(),
+  },
+  -- `show-keys` 上の `Ctrl + T` 表現でも新規タブ selector を使うようにします.
+  {
+    key = 'T',
+    mods = 'CTRL',
+    action = new_tab_with_shell_selector(),
+  },
+  -- `show-keys` 上の `Ctrl + Shift + t` 表現でも新規タブ selector を使うようにします.
+  {
+    key = 't',
+    mods = 'SHIFT|CTRL',
+    action = new_tab_with_shell_selector(),
+  },
+  -- Super + t で新規タブ作成用のシェル選択ランチャーを表示する操作を設定する.
+  {
+    key = 't',
+    mods = 'SUPER',
+    action = new_tab_with_shell_selector(),
+  },
+  -- Ctrl + n で新規ウィンドウ作成用のシェル選択ランチャーを表示する操作を設定する.
+  {
+    key = 'n',
+    mods = 'CTRL',
+    action = new_window_with_shell_selector(),
+  },
+  -- `show-keys` 上の `Ctrl + N` 表現でも新規ウィンドウ selector を使うようにします.
+  {
+    key = 'N',
+    mods = 'CTRL',
+    action = new_window_with_shell_selector(),
+  },
+  -- `show-keys` 上の `Ctrl + Shift + n` 表現でも新規ウィンドウ selector を使うようにします.
+  {
+    key = 'n',
+    mods = 'SHIFT|CTRL',
+    action = new_window_with_shell_selector(),
+  },
+  -- Super + n で新規ウィンドウ作成用のシェル選択ランチャーを表示する操作を設定する.
+  {
+    key = 'n',
+    mods = 'SUPER',
+    action = new_window_with_shell_selector(),
   },
   -- Shift + Delete で現在のタブを閉じる操作を設定する.
   -- `confirm = true` の場合でも, タブ内プロセスが "bash" や "nu" など既定の

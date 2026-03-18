@@ -9,6 +9,60 @@
 let npm_global_bin = ($nu.home-dir | path join ".npm-global" "bin" | path expand)
 $env.PATH = ($env.PATH | where {|it| ($it | path expand) != $npm_global_bin } | prepend $npm_global_bin)
 
+# WezTerm と Podman 文脈をやり取りする user var 名を統一します.
+let podman_user_var_names = {
+  active: "DOTFILES_PODMAN_ACTIVE"
+  container: "DOTFILES_PODMAN_CONTAINER"
+  cwd: "DOTFILES_PODMAN_CWD"
+}
+
+# WezTerm の user var を 1 つ送信します.
+def wezterm_set_user_var [name: string, value: string] {
+  if (($env.TERM_PROGRAM? | default "") != "WezTerm") {
+    return
+  }
+
+  let encoded = ($value | encode base64)
+  print -n $"(ansi --osc $'1337;SetUserVar=($name)=($encoded)')(char bel)"
+}
+
+# Podman 内で再入に使うコンテナー selector を求めます.
+def podman_container_selector [] {
+  let injected_selector = ($env.DOTFILES_PODMAN_CONTAINER? | default "")
+  if not ($injected_selector | is-empty) {
+    $injected_selector
+  } else {
+    let hostname = ($env.HOSTNAME? | default "")
+    if not ($hostname | is-empty) {
+      $hostname
+    } else {
+      try {
+        open /etc/hostname | str trim
+      } catch {
+        ""
+      }
+    }
+  }
+}
+
+# 現在の Podman 文脈を WezTerm へ通知します.
+def update_wezterm_podman_context [] {
+  if (($env.TERM_PROGRAM? | default "") != "WezTerm") {
+    return
+  }
+
+  let in_podman = (("/run/.containerenv" | path exists) or (($env.container? | default "") == "podman"))
+  if $in_podman {
+    wezterm_set_user_var $podman_user_var_names.active "1"
+    wezterm_set_user_var $podman_user_var_names.container (podman_container_selector)
+    wezterm_set_user_var $podman_user_var_names.cwd $env.PWD
+  } else {
+    wezterm_set_user_var $podman_user_var_names.active "0"
+    wezterm_set_user_var $podman_user_var_names.container ""
+    wezterm_set_user_var $podman_user_var_names.cwd ""
+  }
+}
+
 # PWD をホーム配下の場合は "~" に置換して返します.
 def pretty_pwd [] {
   let home = $nu.home-dir
@@ -108,6 +162,8 @@ def git_block [] {
 
 # プロンプト 1 行目を生成します (2 行目のために末尾へ改行を入れます).
 def left_prompt [] {
+  update_wezterm_podman_context
+
   let t = (date now | format date "%Y-%m-%d %H:%M:%S%:z")
   let p = (pretty_pwd)
   let g = (git_block)
