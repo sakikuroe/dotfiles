@@ -42,20 +42,24 @@ $env.config = ($env.config | upsert menus (
 # `fish` がない環境では, 既存の補完設定をそのまま使います.
 if not ((which fish) | is-empty) {
   let fish_completer = {|spans|
+    # Nushell から渡された入力トークン列を, `fish --command` へ渡せる 1 本の文字列へ整形します.
     let escaped_spans = ($spans | str replace --all "'" "\\'" | str join " ")
     let fish_command = $"complete '--do-complete=($escaped_spans)'"
 
+    # `fish` の補完結果を TSV として読み取り, Nushell の補完候補レコードへ変換します.
     fish --command $fish_command
     | from tsv --flexible --noheaders --no-infer
     | rename value description
     | update value {|row|
       let value = $row.value
+      # 空白や括弧を含むパス候補は, そのまま挿入すると再入力が必要になるため引用符で包みます.
       let needs_quote = (
         [' ' '[' ']' '(' ')' "'" '"' '`']
         | any {|char| $value | str contains $char }
       )
 
       if ($needs_quote and ($value | path exists)) {
+        # `~` 付きパスも実体へ展開し, その後にダブルクォート内で安全に使える形へエスケープします.
         let expanded_path = if ($value | str starts-with "~") {
           $value | path expand --no-symlink
         } else {
@@ -69,6 +73,7 @@ if not ((which fish) | is-empty) {
   }
 
   let external_completions = (
+    # 既存の外部補完設定を土台にしつつ, 有効化フラグと completer だけを差し替えます.
     $env.config.completions.external
     | upsert enable true
     | merge { completer: $fish_completer }
