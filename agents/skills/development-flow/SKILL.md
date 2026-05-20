@@ -1,7 +1,6 @@
 ---
 name: development-flow
 description: GitHub Issue を起点とする AI 主導の開発フロー. 開発タスクに着手するとき, または Issue から PR・マージまでの手順を進めるときに使用する.
-disable-model-invocation: true
 ---
 
 ## 概要
