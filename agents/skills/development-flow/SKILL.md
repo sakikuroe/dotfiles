@@ -27,6 +27,7 @@ GitHub Issue を要求の起点とし, AI Agent が実装, 検証, git/gh 操作
 
 - `gh issue create`
 - `gh pr create`, `gh pr ready`, `gh pr edit`, `gh pr merge`
+- `git push origin --delete <branch>` (リモートブランチの削除)
 
 上記以外 (push, コミット, Issue 進捗更新, PR コメント) は認証不要です.
 

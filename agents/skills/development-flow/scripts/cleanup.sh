@@ -31,11 +31,16 @@ echo "branch:   $BRANCH"
 echo "worktree: $WORKTREE_PATH"
 echo ""
 
-# 1. Delete remote branch
+# 1. Delete remote branch (requires user confirmation)
 echo "=== 1/4 remote branch ==="
 if git ls-remote --exit-code origin "$BRANCH" &>/dev/null; then
-    git push origin --delete "$BRANCH"
-    echo "deleted"
+    read -rp "Delete remote branch '$BRANCH'? [y/N] " confirm
+    if [[ "${confirm,,}" != "y" ]]; then
+        echo "skipped"
+    else
+        git push origin --delete "$BRANCH"
+        echo "deleted"
+    fi
 else
     echo "already deleted"
 fi
