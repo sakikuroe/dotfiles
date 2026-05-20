@@ -52,6 +52,11 @@ git config --file ~/.gitconfig.local user.email "you@example.com"
 
 `git config --global ...` は `~/.gitconfig` へ書き込まれるため, `~/.gitconfig.local` へ書き込みたい場合は `--file ~/.gitconfig.local` を使用してください.
 
+## エージェント設定
+
+Claude Code および Codex 向けのスキル設定は `agents/` で管理しています.
+各プロジェクトへの導入方法は [agents/README.md](./agents/README.md) を参照してください.
+
 ## 反映確認
 
 ```bash
