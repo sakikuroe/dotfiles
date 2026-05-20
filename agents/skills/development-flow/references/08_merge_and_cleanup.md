@@ -38,10 +38,7 @@ PR がすでに merge 済みの場合は後処理だけを実行します.
     - PR が `MERGED` であることを確認します.
     - Issue のクローズ状態を確認します (`Closes` による自動クローズ, または手動).
     - Issue の `進捗` を `完了` に更新します.
-    - remote branch を削除します (GitHub Web の `Delete branch` で削除済みなら不要).
-    - 作業用 worktree を削除します (未コミット差分がないことを確認してから).
-    - local branch を削除します.
-    - 制御用 worktree の `main` を `origin/main` に同期します.
+    - `bash ${CLAUDE_SKILL_DIR}/scripts/cleanup.sh <PR番号>` で remote branch 削除 → worktree 削除 → local branch 削除 → main 同期を一括して行います.
 - 最終結果をユーザーへ要約します.
 
 ### 後処理の順序

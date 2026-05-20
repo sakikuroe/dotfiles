@@ -27,10 +27,8 @@
         - 次の指摘へ進む前に必ず push まで完了させます.
     - 該当 review thread または PR コメントへ quote reply で返答します.
         - レビュー本文を引用してから返答します (quote reply 形式).
-        - quote reply の作成手順:
-            1. `gh pr view <PR番号> --json reviews --jq '.reviews[] | select(.id == "<review_id>") | .body'` でレビュー本文を取得します.
-            2. 各行の先頭に `> ` を付けて引用ブロックにします.
-            3. `gh pr comment <PR番号> --body $'> <引用行>\n\n<返答文>'` で投稿します.
+        - `bash ${CLAUDE_SKILL_DIR}/scripts/reply_review.sh <PR番号> <review_node_id> "<返答文>"` で投稿します.
+        - 変更を反映したコミットがある場合は `--with-commit` を付けると commit URL が自動で付加されます.
         - インライン review comment への返答は `gh api repos/{owner}/{repo}/pulls/{pull_number}/comments/{comment_id}/replies -f body="<返答文>"` を使います.
         - 採用 → 何をどう直したかと commit URL を返答します.
         - 非採用 / 別 Issue / 要件変更 → 理由と今後の扱いを返答します.
