@@ -1,8 +1,7 @@
 ---
 name: development-flow
-description: GitHub Issue 駆動の開発フロー. 開発を行う際は常にこの skill を使用する.
-metadata:
-  short-description: AI と人間が協働する開発フロー.
+description: GitHub Issue を起点とする AI 主導の開発フロー. 開発タスクに着手するとき, または Issue から PR・マージまでの手順を進めるときに使用する.
+disable-model-invocation: true
 ---
 
 ## 概要
