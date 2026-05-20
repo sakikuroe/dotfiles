@@ -25,12 +25,18 @@
     - コミットし, push します.
         - 通常 → `git push`, 履歴書き換え → `git push --force-with-lease`.
         - 次の指摘へ進む前に必ず push まで完了させます.
-    - 該当 review thread または PR コメントへ返答します.
+    - 該当 review thread または PR コメントへ quote reply で返答します.
+        - レビュー本文を引用してから返答します (quote reply 形式).
+        - quote reply の作成手順:
+            1. `gh pr view <PR番号> --json reviews --jq '.reviews[] | select(.id == "<review_id>") | .body'` でレビュー本文を取得します.
+            2. 各行の先頭に `> ` を付けて引用ブロックにします.
+            3. `gh pr comment <PR番号> --body $'> <引用行>\n\n<返答文>'` で投稿します.
+        - インライン review comment への返答は `gh api repos/{owner}/{repo}/pulls/{pull_number}/comments/{comment_id}/replies -f body="<返答文>"` を使います.
         - 採用 → 何をどう直したかと commit URL を返答します.
         - 非採用 / 別 Issue / 要件変更 → 理由と今後の扱いを返答します.
         - 返答の末尾に AI Agent であることを示す注記を付けます.
         - 返答例:
-            - ご指摘ありがとうございます. `Option<T>` を返すよう変更しました. 当初は呼び出し元で必ず有効な値が渡されると想定していたためパニックにしていたのですが, 外部 API として公開する以上は呼び出し元でハンドリングできる形が適切でした. 合わせてドキュメントコメントに戻り値の意味を記載しています. 反映コミット: [`xxxxxx`](https://github.com/xxxx/xxxx/commit/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx). *This comment was posted by AI Agent (model: xxxx).*
+            - > ご指摘の箇所について...\n\nご指摘ありがとうございます. `Option<T>` を返すよう変更しました. 反映コミット: [`xxxxxx`](...). *This comment was posted by AI Agent (model: xxxx).*
 - Issue の `完了条件` を実態に合わせて更新します.
     - スコープ変更が入る場合は, チェック状態だけを動かさず, 先に本文を更新します.
     - 新しい独立要求は現 Issue を肥大化させず, 後続 Issue に分離します.
