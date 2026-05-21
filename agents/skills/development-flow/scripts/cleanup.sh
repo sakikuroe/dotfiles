@@ -1,20 +1,24 @@
 #!/usr/bin/env bash
-# Usage: cleanup.sh <pr_number>
+# Usage: cleanup.sh <pr_number> [--yes]
 #
 # Post-merge cleanup in the correct order:
 #   1. Delete remote branch
 #   2. Remove worktree
 #   3. Delete local branch
 #   4. Sync main with origin/main
+#
+# --yes: skip confirmation prompt for remote branch deletion
 
 set -euo pipefail
 
 if [[ $# -lt 1 ]]; then
-    echo "Usage: cleanup.sh <pr_number>" >&2
+    echo "Usage: cleanup.sh <pr_number> [--yes]" >&2
     exit 1
 fi
 
 PR_NUMBER="$1"
+AUTO_YES=false
+[[ "${2:-}" == "--yes" ]] && AUTO_YES=true
 
 PR_STATE=$(gh pr view "$PR_NUMBER" --json state --jq '.state')
 if [[ "$PR_STATE" != "MERGED" ]]; then
@@ -34,9 +38,14 @@ echo ""
 # 1. Delete remote branch (requires user confirmation)
 echo "=== 1/4 remote branch ==="
 if git ls-remote --exit-code origin "$BRANCH" &>/dev/null; then
-    read -rp "Delete remote branch '$BRANCH'? [y/N] " confirm
-    if [[ "${confirm,,}" != "y" ]]; then
-        echo "skipped"
+    if [[ "$AUTO_YES" == false ]]; then
+        read -rp "Delete remote branch '$BRANCH'? [y/N] " confirm
+        if [[ "${confirm,,}" != "y" ]]; then
+            echo "skipped"
+        else
+            git push origin --delete "$BRANCH"
+            echo "deleted"
+        fi
     else
         git push origin --delete "$BRANCH"
         echo "deleted"
