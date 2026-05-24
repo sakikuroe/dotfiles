@@ -21,6 +21,24 @@ Issue の `進捗` と `完了条件` も実態に合わせて更新します.
 - 実装前に Issue を再読します.
     - 目的, 今回やること / やらないこと, 完了条件, 進捗を確認します.
 - Issue の `進捗` を `実装中` に更新します.
+    - 更新は `bash ${CLAUDE_SKILL_DIR}/scripts/update_issue_body.sh <issue番号> <body_file>` で行います.
+    - コマンド例:
+        ```bash
+        cat <<'EOF' > /tmp/issue_body.md
+        ## 機能の概要
+
+        ...
+
+        ## 進捗
+
+        - 状態: 実装中
+        - ブランチ: <branch>
+        - PR: 未作成
+        - 次: Step 05 (push と PR 作成)
+        EOF
+
+        bash ${CLAUDE_SKILL_DIR}/scripts/update_issue_body.sh <issue番号> /tmp/issue_body.md
+        ```
 - 実装を進め, 検証します.
     - テスト, ビルド, 静的解析, 手動確認など, 必要なものを実行します.
     - 作業しやすい粒度でローカルコミットを積みます. 切り戻しや確認がしやすい細かい commit で構いません.

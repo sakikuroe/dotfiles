@@ -37,7 +37,7 @@ PR がすでに merge 済みの場合は後処理だけを実行します.
 - マージ後の確認と後処理を行います.
     - PR が `MERGED` であることを確認します.
     - Issue のクローズ状態を確認します (`Closes` による自動クローズ, または手動).
-    - Issue の `進捗` を `完了` に更新します.
+    - Issue の `進捗` を `完了` に更新します. `bash ${CLAUDE_SKILL_DIR}/scripts/update_issue_body.sh <issue番号> <body_file>` を使います.
     - `bash ${CLAUDE_SKILL_DIR}/scripts/cleanup.sh <PR番号> [--yes]` で remote branch 削除 → worktree 削除 → local branch 削除 → main 同期を一括して行います.
         - 実行場所: メインリポジトリ. 削除対象の worktree 内から実行すると, 削除後にカレントディレクトリが消えてシェルが追従できなくなるため.
         - `--yes` を付けると remote branch 削除の確認プロンプトをスキップします. 非対話環境 (Claude Code など) ではこれを付けます.

@@ -12,11 +12,11 @@
     - worktree path は Step 01 の配置規則に従います (`~/.worktrees/<リポジトリー名>-<ブランチ名>`).
     - worktree がない場合は Step 03 に戻ります.
 - Issue の `進捗` を `指摘対応中` に更新します.
+    - `bash ${CLAUDE_SKILL_DIR}/scripts/update_issue_body.sh <issue番号> <body_file>` を使います.
 - 未対応の指摘がなくなるまで, 1 件ずつ「修正 → コミット → push → 返答」のサイクルを繰り返します. 複数の指摘をまとめて 1 コミットにしてはいけません.
     - 未対応の指摘を取得し, 対象コードを特定します.
-        - GitHub: レビュー, PR コメント, inline comment, CI 結果.
+        - GitHub: `bash ${CLAUDE_SKILL_DIR}/scripts/fetch_reviews.sh <PR番号>` で全体レビューとインライン comment を一括取得します. CI 結果は出力中の `checks` で確認します.
         - 代替: ユーザーが Web 画面の内容を貼り付ける.
-        - レビュー全体とインライン comment は別 API のため両方取得します (Step 06 のコマンド参照).
         - 対象コードは `path`, `original_commit_id`, `originalLine`, `originalStartLine` から特定します. `diff_hunk` や現在の行番号から推測しません.
         - `git show <original_commit_id>:<path> | nl -ba` で comment 時点のコードを確認してから修正に入ります.
         - コメント本文, パス, commit, 行番号, 対象コードの抜粋をセットで整理します.
@@ -66,6 +66,7 @@
     - ready PR の再レビュー待ち → `再レビュー待ち`.
     - draft のまま継続 → `ドラフトレビュー中`.
     - draft → ready に切り替え → `レビュー待ち`.
+    - 更新には `bash ${CLAUDE_SKILL_DIR}/scripts/update_issue_body.sh <issue番号> <body_file>` を使います.
 - Step 06 に戻り, 再レビューを待ちます.
 
 ### Step 02 に戻すべきケース
