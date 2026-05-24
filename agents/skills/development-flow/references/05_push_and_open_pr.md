@@ -25,7 +25,7 @@
 - ユーザーの認証後に PR を作成または更新します.
 - ready PR の場合, レビュー依頼先をユーザーに確認します.
     - 「レビューを依頼するユーザーがいれば GitHub ユーザー名を教えてください」と尋ねます.
-    - ユーザーが指定した場合は `gh pr edit <PR番号> --add-reviewer <username>` で依頼します.
+    - ユーザーが指定した場合は `bash ${CLAUDE_SKILL_DIR}/scripts/add_reviewer.sh <PR番号> <username>` で依頼します.
     - 不要と回答した場合はスキップします.
 - Issue の `進捗` を更新します.
     - ready PR → `レビュー待ち`, draft PR → `ドラフトレビュー中`.
