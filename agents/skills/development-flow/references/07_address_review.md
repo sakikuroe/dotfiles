@@ -33,8 +33,13 @@
         - インライン review comment への返答は `gh api repos/{owner}/{repo}/pulls/{pull_number}/comments/{comment_id}/replies -f body="<返答文>"` を使います.
         - 採用 → 何をどう直したかと commit URL を返答します.
         - 非採用 / 別 Issue / 要件変更 → 理由と今後の扱いを返答します.
-        - 返答例:
-            - > ご指摘の箇所について...\n\nご指摘ありがとうございます. `Option<T>` を返すよう変更しました. 反映コミット: [`xxxxxx`](...).\n\n*This comment was posted by AI Agent.*
+        - コマンド例 (採用・コミットあり):
+            ```bash
+            bash ${CLAUDE_SKILL_DIR}/scripts/reply_review.sh 123 PRR_xxxx \
+              "ご指摘ありがとうございます. 〇〇を修正しました.
+
+*This comment was posted by AI Agent.*" --with-commit
+            ```
 - Issue の `完了条件` を実態に合わせて更新します.
     - スコープ変更が入る場合は, チェック状態だけを動かさず, 先に本文を更新します.
     - 新しい独立要求は現 Issue を肥大化させず, 後続 Issue に分離します.
