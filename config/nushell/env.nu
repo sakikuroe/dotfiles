@@ -53,6 +53,23 @@ def pretty_pwd [] {
   }
 }
 
+# WezTerm のワークスペース名を返します (WezTerm 外または取得失敗時は空文字です).
+def wezterm_workspace [] {
+  let pane_id = if "WEZTERM_PANE" in $env { $env.WEZTERM_PANE } else { "" }
+  if ($pane_id | is-empty) {
+    ""
+  } else {
+    let r = (^wezterm cli list --format json | complete)
+    if $r.exit_code != 0 {
+      ""
+    } else {
+      let panes = ($r.stdout | from json)
+      let matched = ($panes | where { |p| ($p.pane_id | into string) == $pane_id })
+      if ($matched | is-empty) { "" } else { $matched | first | get workspace }
+    }
+  }
+}
+
 # Git 情報を 1 ブロックで返します (repo 外では空文字です).
 def git_block [] {
   let r = (^git status --porcelain=2 --branch | complete)
@@ -109,12 +126,16 @@ def git_block [] {
 # プロンプト 1 行目を生成します (2 行目のために末尾へ改行を入れます).
 def left_prompt [] {
   let t = (date now | format date "%Y-%m-%d %H:%M:%S%:z")
+  let user = (^whoami | str trim)
+  let host = (^hostname | str trim)
   let p = (pretty_pwd)
   let g = (git_block)
+  let ws = (wezterm_workspace)
 
   let g_part = if ($g | is-empty) { "" } else { $" ($g)" }
+  let ws_part = if ($ws | is-empty) { "" } else { " (ws:" + $ws + ")" }
 
-  $"[(ansi cyan)($t)(ansi reset)] (ansi blue)($p)(ansi reset)($g_part)\n"
+  $"[(ansi cyan)($t)(ansi reset)] (ansi blue)($user)@($host):($p)(ansi reset)($g_part)($ws_part)\n"
 }
 
 # プロンプト本体です (毎回評価されます).
