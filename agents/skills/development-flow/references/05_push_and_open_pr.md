@@ -23,9 +23,13 @@
 - PR の内容をユーザーへ提示し, 認証を得ます.
     - PR タイトル, 本文, draft / ready の別を提示します.
 - ユーザーの認証後に PR を作成または更新します.
+    - タイトルにバッククォートを含む場合, `--title "..."` とダブルクォートで渡すとシェルがコマンド置換として解釈しタイトルが壊れる. 変数経由で渡す.
+      例: `TITLE='`foo.md` の修正' && gh pr create --title "$TITLE" ...`
 - ready PR の場合, レビュー依頼先をユーザーに確認します.
     - 「レビューを依頼するユーザーがいれば GitHub ユーザー名を教えてください」と尋ねます.
     - ユーザーが指定した場合は `bash ${CLAUDE_SKILL_DIR}/scripts/add_reviewer.sh <PR番号> <username>` で依頼します.
+      `gh pr edit` が `projectCards` の GraphQL エラーで失敗する場合は REST API を使う.
+      例: `gh api repos/<owner>/<repo>/pulls/<number> --method PATCH --field title='...' --jq '.title'`
     - 不要と回答した場合はスキップします.
 - Issue の `進捗` を更新します.
     - ready PR → `レビュー待ち`, draft PR → `ドラフトレビュー中`.
