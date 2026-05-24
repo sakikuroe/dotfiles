@@ -42,6 +42,4 @@ fi
 
 gh pr comment "$PR_NUMBER" --body "${QUOTED}
 
-${REPLY_BODY}${COMMIT_LINE}
-
-*This comment was posted by AI Agent (model: claude).*"
+${REPLY_BODY}${COMMIT_LINE}"
