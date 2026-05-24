@@ -28,5 +28,5 @@ wezterm connect SSHMUX:myserver
 
 | キー | 動作 |
 |------|------|
-| Alt+Shift+W | ワークスペース一覧を表示して切り替える |
-| Alt+W | 新しいワークスペースを名前をつけて作成する |
+| Ctrl+Shift+L | ワークスペース一覧を表示して切り替える |
+| Ctrl+Shift+W | 新しいワークスペースを名前をつけて作成する |

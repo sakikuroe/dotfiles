@@ -261,17 +261,17 @@ config.harfbuzz_features = { 'calt=0', 'clig=0', 'liga=0' }
 -- 接続先のアドレスやユーザー名は ~/.ssh/config に記述し, このファイルには持たない.
 config.ssh_domains = wezterm.default_ssh_domains()
 
--- Alt+Shift+W: ワークスペース一覧を表示して切り替える.
+-- Ctrl+Shift+L: ワークスペース一覧を表示して切り替える.
 table.insert(config.keys, {
-  key = 'w',
-  mods = 'ALT|SHIFT',
+  key = 'l',
+  mods = 'CTRL|SHIFT',
   action = wezterm.action.ShowLauncherArgs { flags = 'WORKSPACES' },
 })
 
--- Alt+W: 新しいワークスペースを名前をつけて作成する.
+-- Ctrl+Shift+W: 新しいワークスペースを名前をつけて作成する.
 table.insert(config.keys, {
   key = 'w',
-  mods = 'ALT',
+  mods = 'CTRL|SHIFT',
   action = wezterm.action.PromptInputLine {
     description = 'Enter new workspace name',
     action = wezterm.action_callback(function(window, pane, line)
