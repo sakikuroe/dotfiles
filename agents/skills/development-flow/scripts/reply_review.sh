@@ -1,23 +1,29 @@
 #!/usr/bin/env bash
-# Usage: reply_review.sh <pr_number> <review_node_id> <reply_body> [--with-commit]
+# Usage: reply_review.sh <pr_number> <review_node_id> <body_file>
 #
-# Posts a quote reply to a PR review.
-# With --with-commit, appends the latest local commit URL automatically.
+# 指定したレビューの本文を引用ブロックとして付けたうえで,
+# <body_file> の内容を返答コメントとして投稿する.
+#
+# 本文はファイル経由で渡す (--body-file 相当). ヒアドキュメントでの
+# バッククォートエスケープ事故を避けるための設計.
 
 set -euo pipefail
 
 if [[ $# -lt 3 ]]; then
-    echo "Usage: reply_review.sh <pr_number> <review_node_id> <reply_body> [--with-commit]" >&2
+    echo "Usage: reply_review.sh <pr_number> <review_node_id> <body_file>" >&2
     exit 1
 fi
 
 PR_NUMBER="$1"
 REVIEW_NODE_ID="$2"
-REPLY_BODY="$3"
-WITH_COMMIT=false
-[[ "${4:-}" == "--with-commit" ]] && WITH_COMMIT=true
+BODY_FILE="$3"
 
-# Get review body
+if [[ ! -f "$BODY_FILE" ]]; then
+    echo "Error: body file not found: $BODY_FILE" >&2
+    exit 1
+fi
+
+# レビュー本文を取得する.
 REVIEW_BODY=$(gh pr view "$PR_NUMBER" --json reviews \
     --jq ".reviews[] | select(.id == \"$REVIEW_NODE_ID\") | .body")
 
@@ -26,20 +32,13 @@ if [[ -z "$REVIEW_BODY" ]]; then
     exit 1
 fi
 
-# Format as quote block
-QUOTED=$(echo "$REVIEW_BODY" | sed 's/^/> /')
+# 引用ブロック + 空行 + 返答本文 を一時ファイルに組み立てる.
+SEND_FILE=$(mktemp)
+trap 'rm -f "$SEND_FILE"' EXIT
 
-# Build commit line if requested
-COMMIT_LINE=""
-if [[ "$WITH_COMMIT" == true ]]; then
-    REPO=$(gh repo view --json nameWithOwner --jq '.nameWithOwner')
-    COMMIT_SHA=$(git rev-parse HEAD)
-    COMMIT_SHORT=$(git rev-parse --short HEAD)
-    COMMIT_LINE="
+echo "$REVIEW_BODY" | sed 's/^/> /' > "$SEND_FILE"
+echo "" >> "$SEND_FILE"
+cat "$BODY_FILE" >> "$SEND_FILE"
 
-反映コミット: [\`${COMMIT_SHORT}\`](https://github.com/${REPO}/commit/${COMMIT_SHA})"
-fi
-
-gh pr comment "$PR_NUMBER" --body "${QUOTED}
-
-${REPLY_BODY}${COMMIT_LINE}"
+# PR コメントとして投稿する.
+gh pr comment "$PR_NUMBER" --body-file "$SEND_FILE"
