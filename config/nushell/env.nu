@@ -123,7 +123,7 @@ def git_block [] {
   }
 }
 
-# プロンプト 1 行目を生成します (2 行目のために末尾へ改行を入れます).
+# プロンプトを生成します (3 行構成: 日時+ワークスペース / ユーザー@ホスト:パス+git / 入力行).
 def left_prompt [] {
   let t = (date now | format date "%Y-%m-%d %H:%M:%S%:z")
   let user = (^whoami | str trim)
@@ -132,10 +132,10 @@ def left_prompt [] {
   let g = (git_block)
   let ws = (wezterm_workspace)
 
-  let g_part = if ($g | is-empty) { "" } else { $" ($g)" }
   let ws_part = if ($ws | is-empty) { "" } else { " (ws:" + $ws + ")" }
+  let g_part = if ($g | is-empty) { "" } else { $" ($g)" }
 
-  $"[(ansi cyan)($t)(ansi reset)] (ansi blue)($user)@($host):($p)(ansi reset)($g_part)($ws_part)\n"
+  $"[(ansi cyan)($t)(ansi reset)]($ws_part)\n(ansi blue)($user)@($host):($p)(ansi reset)($g_part)\n"
 }
 
 # プロンプト本体です (毎回評価されます).
