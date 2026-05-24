@@ -36,7 +36,7 @@ GitHub Issue を要求の起点とし, AI Agent が実装, 検証, git/gh 操作
 AI Agent が GitHub 上に投稿するすべてのテキスト (PR 本文, PR コメント, review thread への返答) の末尾に, 以下の署名を付けます.
 
 ```
-*This comment was posted by AI Agent (model: <モデル名>).*
+*This comment was posted by AI Agent.*
 ```
 
 ## スクリプト

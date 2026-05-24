@@ -49,7 +49,7 @@
 ## 関連 Issue
 - Closes #<issue番号>
 
-*This comment was posted by AI Agent (model: <モデル名>).*
+*This comment was posted by AI Agent.*
 ```
 
 ## 原則
