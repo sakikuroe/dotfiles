@@ -8,9 +8,16 @@ Issue の `進捗` と `完了条件` も実態に合わせて更新します.
 ## 手順
 
 - 作業用 worktree で対象 branch にいることを確認します.
+    - 実行場所: 以降の編集・検証・コミット作業はすべて作業用 worktree (`~/.worktrees/<repo>-<branch>`) で行います. メインリポジトリでは作業しません.
     - Issue の `進捗` に記録された branch 名と一致すること.
     - worktree path は Step 01 の配置規則に従います.
     - branch または worktree が存在しない場合は Step 03 に戻ります.
+    - コマンド例:
+        ```bash
+        # 実行場所: 作業用 worktree
+        cd ~/.worktrees/<repo>-<branch>
+        git branch --show-current  # 想定 branch と一致することを確認
+        ```
 - 実装前に Issue を再読します.
     - 目的, 今回やること / やらないこと, 完了条件, 進捗を確認します.
 - Issue の `進捗` を `実装中` に更新します.
