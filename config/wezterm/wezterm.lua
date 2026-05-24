@@ -257,4 +257,73 @@ config.enable_scroll_bar = true
 -- これらを無効化することで, 記号の見た目が勝手に変わる状況を避け, 等幅表示の予測可能性を優先します.
 config.harfbuzz_features = { 'calt=0', 'clig=0', 'liga=0' }
 
+-- SSH ドメインを ~/.ssh/config から自動生成する.
+-- 接続先のアドレスやユーザー名は ~/.ssh/config に記述し, このファイルには持たない.
+config.ssh_domains = wezterm.default_ssh_domains()
+
+-- Ctrl+Shift+L: ワークスペース一覧を表示して切り替える.
+table.insert(config.keys, {
+  key = 'l',
+  mods = 'CTRL|SHIFT',
+  action = wezterm.action.ShowLauncherArgs { flags = 'WORKSPACES' },
+})
+
+-- Ctrl+Shift+W: 新しいワークスペースを名前をつけて作成する.
+table.insert(config.keys, {
+  key = 'w',
+  mods = 'CTRL|SHIFT',
+  action = wezterm.action.PromptInputLine {
+    description = 'Enter new workspace name',
+    action = wezterm.action_callback(function(window, pane, line)
+      if line then
+        window:perform_action(
+          wezterm.action.SwitchToWorkspace { name = line },
+          pane
+        )
+      end
+    end),
+  },
+})
+
+-- wezterm connect でドメインに接続した直後に発火する.
+-- ワークスペースが複数あれば選択画面を表示する.
+wezterm.on('gui-attached', function(domain)
+  -- gui-attached 発火時点では GUI ウィンドウが未初期化のため,
+  -- 0 秒後に呼び出すことで現在のイベント処理を抜けてから実行させる.
+  wezterm.time.call_after(0, function()
+    local workspaces = wezterm.mux.get_workspace_names()
+    if #workspaces <= 1 then
+      return
+    end
+    local choices = {}
+    for _, ws in ipairs(workspaces) do
+      table.insert(choices, { id = ws, label = ws })
+    end
+    local active_workspace = wezterm.mux.get_active_workspace()
+    for _, window in ipairs(wezterm.mux.all_windows()) do
+      if window:get_workspace() == active_workspace then
+        local gui_win = window:gui_window()
+        if gui_win then
+          gui_win:perform_action(
+            wezterm.action.InputSelector {
+              title = 'Select workspace',
+              choices = choices,
+              action = wezterm.action_callback(function(win, pane, id, label)
+                if id then
+                  win:perform_action(
+                    wezterm.action.SwitchToWorkspace { name = id },
+                    pane
+                  )
+                end
+              end),
+            },
+            window:active_pane()
+          )
+        end
+        return
+      end
+    end
+  end)
+end)
+
 return config
