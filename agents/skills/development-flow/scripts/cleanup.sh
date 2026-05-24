@@ -31,7 +31,10 @@ fi
 # PR のブランチ名を取得し, worktree パスを算出する.
 # スラッシュをハイフンに置換して, ファイルシステムで安全なパスを生成する.
 BRANCH=$(gh pr view "$PR_NUMBER" --json headRefName --jq '.headRefName')
-REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
+# worktree 内から実行された場合でも正しいリポジトリ名を得るため,
+# --show-toplevel ではなく worktree list の先頭行 (メイン worktree) を使う.
+MAIN_REPO=$(git worktree list --porcelain | awk 'NR==1{print $2}')
+REPO_NAME=$(basename "$MAIN_REPO")
 BRANCH_SAFE="${BRANCH//\//-}"
 WORKTREE_PATH="$HOME/.worktrees/${REPO_NAME}-${BRANCH_SAFE}"
 
@@ -61,6 +64,7 @@ fi
 
 # 2. worktree を削除する.
 # 未コミットの変更がある場合は誤って消さないよう中断する.
+# worktree 削除後はカレントディレクトリが消えるため, 先にメインリポジトリへ移動する.
 echo ""
 echo "=== 2/4 worktree ==="
 if git worktree list --porcelain | grep -q "^worktree $WORKTREE_PATH$"; then
@@ -69,6 +73,7 @@ if git worktree list --porcelain | grep -q "^worktree $WORKTREE_PATH$"; then
         echo "Error: worktree has uncommitted changes. Aborting." >&2
         exit 1
     fi
+    cd "$MAIN_REPO"
     git worktree remove "$WORKTREE_PATH"
     echo "removed"
 else
