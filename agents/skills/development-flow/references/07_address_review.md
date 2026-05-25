@@ -31,7 +31,7 @@
         - 返答本文の末尾には必ず署名 `*This comment was posted by AI Agent.*` を含めます. スクリプトは署名を自動付加しません.
         - 採用 → 何をどう直したかと commit URL を返答します (インライン返答は `--with-commit` で自動付加).
         - 非採用 / 別 Issue / 要件変更 → 理由と今後の扱いを返答します.
-        - **レビュー全体への返答**: `bash ${CLAUDE_SKILL_DIR}/scripts/reply_review.sh <PR番号> <review_node_id> <body_file>` を使います.
+        - レビュー全体への返答: `bash ${CLAUDE_SKILL_DIR}/scripts/reply_review.sh <PR番号> <review_node_id> <body_file>` を使います.
             - 実行場所: 作業用 worktree (`gh pr comment` がリポジトリを判定するため worktree でもメインリポジトリでも可).
             - コマンド例:
                 ```bash
@@ -43,7 +43,7 @@
 
                 bash ${CLAUDE_SKILL_DIR}/scripts/reply_review.sh 123 PRR_xxxx /tmp/reply.md
                 ```
-        - **インライン review comment への返答**: `bash ${CLAUDE_SKILL_DIR}/scripts/reply_inline.sh <PR番号> <comment_id> <body_file> [--with-commit]` を使います.
+        - インライン review comment への返答: `bash ${CLAUDE_SKILL_DIR}/scripts/reply_inline.sh <PR番号> <comment_id> <body_file> [--with-commit]` を使います.
             - 実行場所: 作業用 worktree. `--with-commit` を付ける場合は反映済みコミットの HEAD にいる worktree で実行する.
             - `--with-commit` を付けると, 直近の HEAD コミット URL を本文中の署名直前に挿入してくれます.
             - コマンド例 (採用・コミット URL 付き):
