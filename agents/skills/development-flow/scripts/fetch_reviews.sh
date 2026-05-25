@@ -46,7 +46,7 @@ jq -n --argjson pr "$PR_INFO" --argjson inline "$INLINE" '{
     })),
     inline_comments: ($inline | map({
         id, in_reply_to_id, path, line,
-        original_line, original_start_line, original_commit_id, body,
+        original_line, original_commit_id, body,
         user: .user.login
     }))
 }'

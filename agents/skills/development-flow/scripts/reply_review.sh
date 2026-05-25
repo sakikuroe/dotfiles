@@ -23,26 +23,21 @@ if [[ ! -f "$BODY_FILE" ]]; then
     exit 1
 fi
 
-# レビューの存在を確認する.
-REVIEW_EXISTS=$(gh pr view "$PR_NUMBER" --json reviews \
-    --jq ".reviews[] | select(.id == \"$REVIEW_NODE_ID\") | .id")
-if [[ -z "$REVIEW_EXISTS" ]]; then
+# レビュー本文を取得する.
+REVIEW_BODY=$(gh pr view "$PR_NUMBER" --json reviews \
+    --jq ".reviews[] | select(.id == \"$REVIEW_NODE_ID\") | .body")
+
+if [[ -z "$REVIEW_BODY" ]]; then
     echo "Error: review not found (id: $REVIEW_NODE_ID)" >&2
     exit 1
 fi
 
-# レビュー本文を取得する (本文なし APPROVE などで空になることがある).
-REVIEW_BODY=$(gh pr view "$PR_NUMBER" --json reviews \
-    --jq ".reviews[] | select(.id == \"$REVIEW_NODE_ID\") | .body")
-
-# 引用ブロック (あれば) + 空行 + 返答本文 を一時ファイルに組み立てる.
+# 引用ブロック + 空行 + 返答本文 を一時ファイルに組み立てる.
 SEND_FILE=$(mktemp)
 trap 'rm -f "$SEND_FILE"' EXIT
 
-if [[ -n "$REVIEW_BODY" ]]; then
-    echo "$REVIEW_BODY" | sed 's/^/> /' >> "$SEND_FILE"
-    echo "" >> "$SEND_FILE"
-fi
+echo "$REVIEW_BODY" | sed 's/^/> /' > "$SEND_FILE"
+echo "" >> "$SEND_FILE"
 cat "$BODY_FILE" >> "$SEND_FILE"
 
 # PR コメントとして投稿する.

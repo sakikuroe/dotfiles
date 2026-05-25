@@ -17,7 +17,7 @@
     - 未対応の指摘を取得し, 対象コードを特定します.
         - GitHub: `bash ${CLAUDE_SKILL_DIR}/scripts/fetch_reviews.sh <PR番号>` で全体レビューとインライン comment を一括取得します. CI 結果は出力中の `checks` で確認します.
         - 代替: ユーザーが Web 画面の内容を貼り付ける.
-        - 対象コードは `path`, `original_commit_id`, `original_line`, `original_start_line` から特定します. `diff_hunk` や現在の行番号から推測しません.
+        - 対象コードは `path`, `original_commit_id`, `originalLine`, `originalStartLine` から特定します. `diff_hunk` や現在の行番号から推測しません.
         - `git show <original_commit_id>:<path> | nl -ba` で comment 時点のコードを確認してから修正に入ります.
         - コメント本文, パス, commit, 行番号, 対象コードの抜粋をセットで整理します.
     - 方針をユーザーへ提示し, 採否を確定します.
