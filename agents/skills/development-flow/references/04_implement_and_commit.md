@@ -8,12 +8,37 @@ Issue の `進捗` と `完了条件` も実態に合わせて更新します.
 ## 手順
 
 - 作業用 worktree で対象 branch にいることを確認します.
+    - 実行場所: 以降の編集・検証・コミット作業はすべて作業用 worktree (`~/.worktrees/<repo>-<branch>`) で行います. メインリポジトリでは作業しません.
     - Issue の `進捗` に記録された branch 名と一致すること.
     - worktree path は Step 01 の配置規則に従います.
     - branch または worktree が存在しない場合は Step 03 に戻ります.
+    - コマンド例:
+        ```bash
+        # 実行場所: 作業用 worktree
+        cd ~/.worktrees/<repo>-<branch>
+        git branch --show-current  # 想定 branch と一致することを確認
+        ```
 - 実装前に Issue を再読します.
     - 目的, 今回やること / やらないこと, 完了条件, 進捗を確認します.
 - Issue の `進捗` を `実装中` に更新します.
+    - 更新は `bash ${CLAUDE_SKILL_DIR}/scripts/update_issue_body.sh <issue番号> <body_file>` で行います.
+    - コマンド例:
+        ```bash
+        cat <<'EOF' > /tmp/issue_body.md
+        ## 機能の概要
+
+        ...
+
+        ## 進捗
+
+        - 状態: 実装中
+        - ブランチ: <branch>
+        - PR: 未作成
+        - 次: Step 05 (push と PR 作成)
+        EOF
+
+        bash ${CLAUDE_SKILL_DIR}/scripts/update_issue_body.sh <issue番号> /tmp/issue_body.md
+        ```
 - 実装を進め, 検証します.
     - テスト, ビルド, 静的解析, 手動確認など, 必要なものを実行します.
     - 作業しやすい粒度でローカルコミットを積みます. 切り戻しや確認がしやすい細かい commit で構いません.
