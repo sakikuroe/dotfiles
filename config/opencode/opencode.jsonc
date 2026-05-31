@@ -4,6 +4,10 @@
   "permission": {
     "edit": "allow",
     "read": "allow",
-    "bash": "ask"
+    "bash": "ask",
+    "websearch": "ask"
+  },
+  "compaction": {
+    "prune": false
   }
 }
