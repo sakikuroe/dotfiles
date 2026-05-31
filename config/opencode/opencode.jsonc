@@ -1,14 +1,8 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "autoupdate": false,
   "permission": {
     "edit": "allow",
     "read": "allow"
   }
-  // 今後の設定追加例:
-  // "model": "anthropic/claude-sonnet-4-5",
-  // "small_model": "anthropic/claude-haiku-4-5",
-  // "autoupdate": true,
-  // "bash": { "*": "ask", "git *": "allow" },
-  // "formatter": true,
-  // "lsp": true,
 }
