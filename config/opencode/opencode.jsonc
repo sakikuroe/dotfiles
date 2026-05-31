@@ -3,6 +3,7 @@
   "autoupdate": false,
   "permission": {
     "edit": "allow",
-    "read": "allow"
+    "read": "allow",
+    "bash": "ask"
   }
 }
