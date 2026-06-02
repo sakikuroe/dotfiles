@@ -29,7 +29,7 @@
         - 次の指摘へ進む前に必ず push まで完了させること.
     - 該当 review thread または PR コメントへ quote reply で返答する.
         - 返答本文の末尾には必ず署名 `*This comment was posted by AI Agent.*` を含めること. スクリプトは署名を自動付加しない.
-        - 採用 → 何をどう直したかと commit URL を返答する (インライン返答は `--with-commit` で自動付加).
+        - 採用 → 何をどう直したかと commit URL を返答する (インライン返答はデフォルトで自動付加).
         - 非採用 / 別 Issue / 要件変更 → 理由と今後の扱いを返答する.
         - レビュー全体への返答: `bash ${CLAUDE_SKILL_DIR}/scripts/reply_review.sh <PR番号> <review_node_id> <body_file>` を使う.
             - 実行場所: 作業用 worktree (`gh pr comment` がリポジトリーを判定するため worktree でもメインリポジトリーでも可).
@@ -43,10 +43,11 @@
 
                 bash ${CLAUDE_SKILL_DIR}/scripts/reply_review.sh 123 PRR_xxxx /tmp/reply.md
                 ```
-        - インライン review comment への返答: `bash ${CLAUDE_SKILL_DIR}/scripts/reply_inline.sh <PR番号> <comment_id> <body_file> [--with-commit]` を使う.
-            - 実行場所: 作業用 worktree. `--with-commit` を付ける場合は反映済みコミットの HEAD にいる worktree で実行すること.
-            - `--with-commit` を付けると, 直近の HEAD コミット URL を本文中の署名直前に挿入する.
-            - コマンド例 (採用・コミット URL 付き):
+        - インライン review comment への返答: `bash ${CLAUDE_SKILL_DIR}/scripts/reply_inline.sh <PR番号> <comment_id> <body_file> [--no-commit]` を使う.
+            - 実行場所: 作業用 worktree. コミット URL を挿入する場合は反映済みコミットの HEAD にいる worktree で実行すること.
+            - デフォルトで直近の HEAD コミット URL を本文中の署名直前に挿入する. コミットが存在しない場合はエラーで終了する.
+            - `--no-commit` を付けると, commit URL の挿入をスキップする.
+            - コマンド例 (採用・デフォルトでコミット URL 付き):
                 ```bash
                 cat <<'EOF' > /tmp/reply_inline.md
                 ご指摘ありがとうございます. 〇〇を修正しました.
@@ -54,7 +55,17 @@
                 *This comment was posted by AI Agent.*
                 EOF
 
-                bash ${CLAUDE_SKILL_DIR}/scripts/reply_inline.sh 123 456789 /tmp/reply_inline.md --with-commit
+                bash ${CLAUDE_SKILL_DIR}/scripts/reply_inline.sh 123 456789 /tmp/reply_inline.md
+                ```
+            - コマンド例 (非採用・コミット URL 不要):
+                ```bash
+                cat <<'EOF' > /tmp/reply_inline.md
+                ご指摘ありがとうございます. 今回は〇〇の理由で対応を見送ります.
+
+                *This comment was posted by AI Agent.*
+                EOF
+
+                bash ${CLAUDE_SKILL_DIR}/scripts/reply_inline.sh 123 456789 /tmp/reply_inline.md --no-commit
                 ```
 - Issue の `完了条件` を実態に合わせて更新する.
     - スコープ変更が入る場合は, チェック状態だけを動かさず, 先に本文を更新すること.
