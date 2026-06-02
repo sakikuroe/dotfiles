@@ -8,11 +8,11 @@
 ## 手順
 
 - 対象 branch と worktree を特定する.
-    - Issue の `進捗` から branch 名と PR を確認する.
+    - Issue のコメント履歴から branch 名と PR を確認する.
     - worktree path は Step 01 の配置規則に従う (`~/.worktrees/<リポジトリー名>-<ブランチ名>`).
     - worktree がない場合は Step 03 に戻ること.
-- Issue の `進捗` を `指摘対応中` に更新する.
-    - `bash ${CLAUDE_SKILL_DIR}/scripts/update_issue_body.sh <issue番号> <body_file>` を使う.
+- 進捗コメントで状態を `指摘対応中` に記録する.
+    - `bash ${CLAUDE_SKILL_DIR}/scripts/add_progress_comment.sh <issue番号> <body_file>` で投稿する.
 - 未対応の指摘がなくなるまで, 1 件ずつ「修正 → コミット → push → 返答」のサイクルを繰り返す. 複数の指摘をまとめて 1 コミットにしないこと.
     - 未対応の指摘を取得し, 対象コードを特定する.
         - GitHub: `bash ${CLAUDE_SKILL_DIR}/scripts/fetch_reviews.sh <PR番号>` で全体レビューとインライン comment を一括取得する. CI 結果は出力中の `checks` で確認する.
@@ -62,11 +62,11 @@
 - 必要に応じて PR の状態を更新する.
     - ready PR の場合 → ユーザー認証後に再レビュー依頼する.
     - draft から ready に切り替える場合 → ユーザー認証後に `bash ${CLAUDE_SKILL_DIR}/scripts/set_ready.sh <PR番号>` を実行し, `Refs` を `Closes` に更新する.
-- Issue の `進捗` を更新する.
+- 進捗コメントで状態を記録する.
     - ready PR の再レビュー待ち → `再レビュー待ち`.
     - draft のまま継続 → `ドラフトレビュー中`.
     - draft → ready に切り替え → `レビュー待ち`.
-    - 更新には `bash ${CLAUDE_SKILL_DIR}/scripts/update_issue_body.sh <issue番号> <body_file>` を使う.
+    - `bash ${CLAUDE_SKILL_DIR}/scripts/add_progress_comment.sh <issue番号> <body_file>` で投稿する.
 - Step 06 に戻り, 再レビューを待つ.
 
 ### Step 02 に戻すべきケース
@@ -91,4 +91,4 @@
 - [ ] 修正が作業用 worktree で検証済みである.
 - [ ] 指摘への返答と再レビュー依頼が完了している.
 - [ ] PR が再レビュー可能な状態になっている.
-- [ ] Issue の `進捗` が PR 状態に一致している.
+- [ ] 進捗コメントが PR 状態と一致している.

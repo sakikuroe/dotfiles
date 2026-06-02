@@ -57,7 +57,6 @@
         ## 動作を確認する手順
 
         ...
-
         EOF
 
         gh pr create \
@@ -73,9 +72,8 @@
         - `gh pr edit` が `projectCards` の GraphQL エラーで失敗する場合は REST API を使う.
           例: `gh api repos/<owner>/<repo>/pulls/<number> --method PATCH --field title='...' --jq '.title'`
     - 不要と回答した場合はスキップする.
-- Issue の `進捗` を更新する.
-    - ready PR → `レビュー待ち`, draft PR → `ドラフトレビュー中`.
-    - `ブランチ`, `PR`, `次` を更新する.
+- PR URL と状態を進捗コメントで記録する. `add_progress_comment.sh` で投稿すること.
+    - ready PR → 状態は `レビュー待ち`, draft PR → `ドラフトレビュー中`.
 
 ## 原則
 
@@ -89,5 +87,5 @@
 
 - [ ] 作業ブランチが origin に push 済みである.
 - [ ] PR が `main` 向けに作成または再利用されている.
-- [ ] Issue の `進捗` が PR 状態に一致している.
+- [ ] 進捗コメントが PR 状態と一致している.
 - [ ] Step 06 を開始できる状態になっている.

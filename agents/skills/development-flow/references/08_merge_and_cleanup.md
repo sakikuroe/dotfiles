@@ -10,8 +10,8 @@ PR がすでに merge 済みの場合は後処理だけを実行する.
 
 - 制御用 worktree で実行していることを確認する.
     - `main` branch にいること, 無関係な未コミット差分がないこと.
-- Issue の `進捗` から branch 名と PR を確認する.
-    - `ブランチ` と `PR` が空の場合は中断すること.
+- Issue のコメント履歴から branch 名と PR を確認する.
+    - branch 名と PR が見つからない場合は中断すること.
     - worktree path は Step 01 の配置規則に従う.
 - PR の状態を確認し, 分岐する.
     - `MERGED` の場合 → 後処理へ進む.
@@ -27,17 +27,17 @@ PR がすでに merge 済みの場合は後処理だけを実行する.
     - 条件を満たさない場合は Step 06 または Step 07 に戻ること.
 - マージ方法を決める.
     - merge queue を使わない場合:
-        - Issue の `進捗` を `マージ待ち` に更新する.
+        - 進捗コメントで状態を `マージ待ち` に記録する.
         - ユーザーへマージを依頼する (テンプレートは下記参照).
         - ユーザーが GitHub Web でマージする. AI Agent が代行する場合は認証後に `gh pr merge` を実行する.
     - merge queue を使う場合:
-        - Issue の `進捗` を `merge queue 待ち` に更新する.
+        - 進捗コメントで状態を `merge queue 待ち` に記録する.
         - ユーザーへ queue 投入を依頼する. AI Agent が代行する場合は認証後に `gh pr merge --auto` を実行する.
         - Step 06 へ戻り, `MERGED` になるまで待つ.
 - マージ後の確認と後処理を行う.
     - PR が `MERGED` であることを確認する.
     - Issue のクローズ状態を確認する (`Closes` による自動クローズ, または手動).
-    - Issue の `進捗` を `完了` に更新する. `bash ${CLAUDE_SKILL_DIR}/scripts/update_issue_body.sh <issue番号> <body_file>` を使う.
+    - 進捗コメントで状態を `完了` に記録する. `bash ${CLAUDE_SKILL_DIR}/scripts/add_progress_comment.sh <issue番号> <body_file>` を使う.
     - `bash ${CLAUDE_SKILL_DIR}/scripts/cleanup.sh <PR番号> [--yes]` で remote branch 削除 → worktree 削除 → local branch 削除 → main 同期を一括して行う.
         - 実行場所: メインリポジトリー. 削除対象の worktree 内から実行すると, 削除後にカレントディレクトリが消えてシェルが追従できなくなるため.
         - `--yes` を付けると remote branch 削除の確認プロンプトをスキップする. 非対話環境 (Claude Code など) ではこれを付けること.
@@ -101,6 +101,6 @@ GitHub Web で `Add to merge queue` または `Merge when ready` をお願いし
 ## この phase の完了条件
 
 - [ ] 対象変更が `main` に取り込まれている.
-- [ ] Issue の `進捗` が `完了` に更新されている.
+- [ ] 進捗コメントで `完了` が記録されている.
 - [ ] 作業用 worktree と branch が削除されている.
 - [ ] 制御用 worktree の `main` が同期されている.
