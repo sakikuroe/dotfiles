@@ -2,35 +2,35 @@
 
 ## 概要
 
-Issue に紐付く短寿命ブランチを作成し, 開発用の worktree を用意します.
-既存作業の再開時は branch と worktree を再利用します.
+Issue に紐付く短寿命ブランチを作成し, 開発用の worktree を用意する.
+既存作業の再開時は branch と worktree を再利用する.
 
 ## 手順
 
-- ブランチを用意します.
+- ブランチを用意する.
     - 形式: `<kind>/<issue番号>-<short-description>`
         - `kind`: `feature` / `fix` / `hotfix` / `chore` / `docs` / `refactor`.
         - 例: `feature/123-add-search-filters`.
-    - `git fetch origin --prune` でリモートを最新化してから, local / remote の有無を確認します.
-    - 対応する branch が存在する場合は再利用します.
+    - `git fetch origin --prune` でリモートを最新化してから, local / remote の有無を確認する.
+    - 対応する branch が存在する場合は再利用する.
     - 新規作成する場合: `git checkout -b <branch-name>`
-- worktree を用意します.
-    - `~/.worktrees/<リポジトリー名>-<ブランチ名>` に置きます. ブランチ名の `/` は `-` に置換します.
+- worktree を用意する.
+    - `~/.worktrees/<リポジトリー名>-<ブランチ名>` に置く. ブランチ名の `/` は `-` に置換する.
         - 例: リポジトリー `my-app`, ブランチ `feature/123-add-search` → `~/.worktrees/my-app-feature-123-add-search`.
-    - `bash ${CLAUDE_SKILL_DIR}/scripts/create_worktree.sh <branch-name>` で作成・再利用を一括して行います.
-        - 実行場所: メインリポジトリから実行するのが基本. worktree 内からでも動作する (スクリプトが `git worktree list` の先頭行でメインリポジトリを特定する).
+    - `bash ${CLAUDE_SKILL_DIR}/scripts/create_worktree.sh <branch-name>` で作成・再利用を一括して行う.
+        - 実行場所: メインリポジトリーから実行するのが基本. worktree 内からでも動作する (スクリプトが `git worktree list` の先頭行でメインリポジトリーを特定する).
         - コマンド例:
             ```bash
-            # 実行場所: メインリポジトリ
+            # 実行場所: メインリポジトリー
             bash ${CLAUDE_SKILL_DIR}/scripts/create_worktree.sh feature/123-add-search-filters
             ```
-- Issue の `進捗` を更新します.
-    - `ブランチ` に branch 名を記録します.
-    - `次` を `Step 04 (作業用 worktree で実装とコミット)` に更新します.
+- Issue の `進捗` を更新する.
+    - `ブランチ` に branch 名を記録する.
+    - `次` を `Step 04 (作業用 worktree で実装とコミット)` に更新する.
 
 ## 原則
 
-- branch の衝突や worktree の不整合など, 判断に迷う場合は作業を中断し, ユーザーに報告, 相談します.
+- branch の衝突や worktree の不整合など, 判断に迷う場合は作業を中断し, ユーザーに報告・相談すること.
 
 ## この phase の完了条件
 
