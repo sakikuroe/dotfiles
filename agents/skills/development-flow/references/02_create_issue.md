@@ -41,7 +41,7 @@ Issue は以降のすべての Step の基準となるため, 要求・完了条
         - 次: Step 03 (作業ブランチと worktree 作成)
         EOF
 
-        bash ${CLAUDE_SKILL_DIR}/scripts/create_issue.sh "<タイトル>" /tmp/issue_body.md --label "<label>"
+        bash ${CLAUDE_SKILL_DIR}/scripts/create_issue.sh "<タイトル>" /tmp/issue_body.md
         ```
 - 作成後は結果 (URL, 番号, 本文) が意図どおりであることを確認する. なお, Issue 本文を後から更新する場合は `bash ${CLAUDE_SKILL_DIR}/scripts/update_issue_body.sh <issue番号> <body_file>` を使うこと. 進捗フィールドの更新でも同じスクリプトを使う.
 
