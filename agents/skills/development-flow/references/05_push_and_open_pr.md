@@ -42,6 +42,7 @@
     - 実行場所: メインリポジトリー. `gh pr create` はカレントブランチから PR を作るため, worktree から実行すると別 Bash セッションで cwd がリセットされて main から作ろうとしてエラーになる事故が起きやすい. メインリポジトリーから `--head <branch>` で明示するのが安全.
     - PR 本文は `templates/pr.md` を参照して書くこと. ヒアドキュメントで一時ファイルに書き出してから `--body-file` で渡すこと.
     - タイトルにバッククォートを含む場合, `--title "..."` とダブルクォートで渡すとシェルがコマンド置換として解釈し壊れる. 変数経由かシングルクォートで渡すこと.
+    - PR 作成は `bash ${CLAUDE_SKILL_DIR}/scripts/create_pr.sh <タイトル> <body_file> <head_branch>` を使うこと. 本文末尾に署名を自動付加する.
     - コマンド例:
         ```bash
         # 実行場所: メインリポジトリー
@@ -59,11 +60,7 @@
         ...
         EOF
 
-        gh pr create \
-          --title "<タイトル>" \
-          --body-file /tmp/pr_body.md \
-          --head <branch> \
-          --base main
+        bash ${CLAUDE_SKILL_DIR}/scripts/create_pr.sh "<タイトル>" /tmp/pr_body.md <branch>
         ```
 - ready PR の場合, レビュー依頼先をユーザーに確認する.
     - 「レビューを依頼するユーザーがいれば GitHub ユーザー名を教えてください」と尋ねる.

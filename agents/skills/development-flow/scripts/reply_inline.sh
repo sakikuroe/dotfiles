@@ -2,14 +2,16 @@
 # Usage: reply_inline.sh <pr_number> <comment_id> <body_file> [--no-commit]
 #
 # PR のインライン review comment に返答を投稿する.
-# デフォルトで直近の commit URL を本文中の署名直前に挿入する.
-# 署名が見つからない場合は本文末尾に追加する.
+# 本文ファイルの末尾に署名 `*This comment was posted by AI Agent.*` を自動付加する.
+# デフォルトで直近の commit URL を署名直前に挿入する.
 # --no-commit を付けると, commit URL の挿入をスキップする.
 #
 # 本文はファイル経由で渡す (--body-file 相当). ヒアドキュメントでの
 # バッククォートエスケープ事故を避けるための設計.
 
 set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [[ $# -lt 3 ]]; then
     echo "Usage: reply_inline.sh <pr_number> <comment_id> <body_file> [--no-commit]" >&2
@@ -29,13 +31,15 @@ fi
 
 REPO=$(gh repo view --json nameWithOwner --jq '.nameWithOwner')
 
-# 送信用の本文ファイルを決定する.
-# デフォルトでは本文中の署名直前に commit URL を挿入したファイルを作る.
-# --no-commit のときはそのまま送信する.
-SEND_FILE="$BODY_FILE"
+# 1. 署名を自動追加
+SIG_FILE=$(mktemp)
+trap 'rm -f "$SIG_FILE" "$SEND_FILE"' EXIT
+bash "${SCRIPT_DIR}/_append_signature.sh" "$BODY_FILE" > "$SIG_FILE"
+
+# 2. commit URL を署名直前に挿入（--no-commit の場合はスキップ）
+SEND_FILE="$SIG_FILE"
 if [[ "$NO_COMMIT" == false ]]; then
     SEND_FILE=$(mktemp)
-    trap 'rm -f "$SEND_FILE"' EXIT
     if ! COMMIT_SHA=$(git rev-parse HEAD 2>/dev/null); then
         echo "Error: コミットが存在しないか git rev-parse HEAD に失敗しました." >&2
         exit 1
@@ -44,8 +48,6 @@ if [[ "$NO_COMMIT" == false ]]; then
     COMMIT_LINE="反映コミット: [\`${COMMIT_SHORT}\`](https://github.com/${REPO}/commit/${COMMIT_SHA})"
     SIGNATURE='*This comment was posted by AI Agent.*'
 
-    # 署名行 (`*This comment was posted by AI Agent.*`) を見つけたらその直前に commit URL と空行を挿入する.
-    # 署名が無ければ末尾に空行 + commit URL を追加する.
     awk -v commit="$COMMIT_LINE" -v sig="$SIGNATURE" '
         $0 == sig && !inserted {
             print commit
@@ -53,13 +55,7 @@ if [[ "$NO_COMMIT" == false ]]; then
             inserted = 1
         }
         { print }
-        END {
-            if (!inserted) {
-                print ""
-                print commit
-            }
-        }
-    ' "$BODY_FILE" > "$SEND_FILE"
+    ' "$SIG_FILE" > "$SEND_FILE"
 fi
 
 # 返答コメントを投稿する.
