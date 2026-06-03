@@ -2,8 +2,8 @@
 # Usage: update_issue_body.sh <issue_number> <body_file>
 #
 # 指定した Issue 番号の本文をファイル内容で置き換える.
-# 進捗フィールドの更新を頻繁に行うため, ファイル経由で渡すパターンを強制する
-# wrapper として用意した.
+# description 本文の節 (完了条件, 背景・動機など) の内容変更に使う.
+# ファイル経由で渡すパターンを強制する wrapper として用意した.
 
 set -euo pipefail
 
