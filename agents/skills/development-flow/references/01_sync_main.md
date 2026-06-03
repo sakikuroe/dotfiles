@@ -20,7 +20,7 @@
         - `ahead` / `diverged` や未コミット差分がある場合は中断し, ユーザーと合意すること.
         - Step 02 へ進む.
     - Issue, branch, PR, worktree のいずれかが存在する場合:
-        - Issue の `進捗` から状態, branch 名, PR 番号, `次` を確認する.
+        - Issue のコメント履歴 (新しい順) からブランチ名・PR・状態を読み取る.
         - branch, worktree, PR の現在状態と照合し, 次の Step を決める.
         - 対応関係が一意に決まらない場合は中断し, ユーザーに確認すること.
 
@@ -46,7 +46,7 @@ path は Issue に記録せず, branch 名からこの規則で都度求める.
 
 再開時は以下の順に情報を取得し, 上位を優先する.
 
-1. Issue の `進捗` (`状態`, `ブランチ`, `PR`, `次`).
+1. Issue のコメント履歴 (ブランチ名, PR, 状態).
 2. `git worktree list --porcelain`.
 3. `gh pr list --head "<branch名>" --state all`.
 
