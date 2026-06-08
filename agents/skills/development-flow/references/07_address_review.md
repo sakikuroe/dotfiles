@@ -27,6 +27,10 @@
     - コミットし, push する.
         - 通常 → `git push`, 履歴書き換え → `git push --force-with-lease`.
         - コミット時は `bash ${CLAUDE_SKILL_DIR}/scripts/commit_with_signature.sh "<メッセージ>"` を使うこと.
+            - コマンド例:
+                ```bash
+                bash ${CLAUDE_SKILL_DIR}/scripts/commit_with_signature.sh "Fix: 〇〇を修正した"
+                ```
         - 次の指摘へ進む前に必ず push まで完了させること.
     - 該当 review thread または PR コメントへ quote reply で返答する.
         - スクリプト (`reply_review.sh`, `reply_inline.sh`) が返答本文の末尾に署名を自動付加するため, 本文ファイルに署名を含める必要はない.
