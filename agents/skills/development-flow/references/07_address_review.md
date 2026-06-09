@@ -13,7 +13,7 @@
     - worktree がない場合は Step 03 に戻ること.
 - 進捗コメントで状態を `指摘対応中` に記録する.
     - `bash ${CLAUDE_SKILL_DIR}/scripts/add_progress_comment.sh <issue番号> <body_file>` で投稿する.
-- 未対応の指摘がなくなるまで, 1 件ずつ「修正 → コミット → push → 返答」のサイクルを繰り返す. 複数の指摘をまとめて 1 コミットにしないこと.
+- 未対応の指摘がなくなるまで, 1 件ずつ「修正 → コミット → push → 返答」のサイクルを繰り返す. 複数の指摘をまとめて 1 コミットにしないこと. 1 件のサイクル (修正 → コミット → push → 返答) を完遂してから次の指摘に進むこと. 返答を先送りにして別の指摘へ進んではならない.
     - 未対応の指摘を取得し, 対象コードを特定する.
         - GitHub: `bash ${CLAUDE_SKILL_DIR}/scripts/fetch_reviews.sh <PR番号>` で全体レビューとインライン comment を一括取得する. CI 結果は出力中の `checks` で確認する.
         - 代替: ユーザーが Web 画面の内容を貼り付ける.
@@ -33,8 +33,8 @@
                 ```
         - 次の指摘へ進む前に必ず push まで完了させること.
     - 該当 review thread または PR コメントへ quote reply で返答する.
-        - スクリプト (`reply_review.sh`, `reply_inline.sh`) が返答本文の末尾に署名を自動付加するため, 本文ファイルに署名を含める必要はない.
-        - 採用 → 何をどう直したかと commit URL を返答する (インライン返答はデフォルトで自動付加).
+- 返答本文の末尾には必ず署名 `*This comment was posted by AI Agent.*` を含めること. スクリプト (`reply_review.sh`, `reply_inline.sh`) が返答本文の末尾に署名を自動付加するため, 本文ファイルに署名を含める必要はない.
+        - 採用 → 何をどう直したかを返答する. インライン返答では `<commit_hash>` に反映コミットを明示的に指定し, スクリプトが commit URL を署名直前に挿入する.
         - 非採用 / 別 Issue / 要件変更 → 理由と今後の扱いを返答する.
         - レビュー全体への返答: `bash ${CLAUDE_SKILL_DIR}/scripts/reply_review.sh <PR番号> <review_node_id> <body_file>` を使う.
             - 実行場所: 作業用 worktree (`gh pr comment` がリポジトリーを判定するため worktree でもメインリポジトリーでも可).
@@ -46,17 +46,17 @@
 
                 bash ${CLAUDE_SKILL_DIR}/scripts/reply_review.sh 123 PRR_xxxx /tmp/reply.md
                 ```
-        - インライン review comment への返答: `bash ${CLAUDE_SKILL_DIR}/scripts/reply_inline.sh <PR番号> <comment_id> <body_file> [--no-commit]` を使う.
-            - 実行場所: 作業用 worktree. コミット URL を挿入する場合は反映済みコミットの HEAD にいる worktree で実行すること.
-            - 本文末尾に署名を自動付加し, デフォルトで直近の HEAD コミット URL を署名直前に挿入する. コミットが存在しない場合はエラーで終了する.
-            - `--no-commit` を付けると, commit URL の挿入をスキップする.
-            - コマンド例 (採用・デフォルトでコミット URL 付き):
+- インライン review comment への返答: `bash ${CLAUDE_SKILL_DIR}/scripts/reply_inline.sh <PR番号> <comment_id> <body_file> <commit_hash|->` を使う.
+            - 実行場所: 作業用 worktree.
+            - 採用時は, `<commit_hash>` に該当指摘への対応を含むコミットを明示的に指定すること. HEAD や直近のコミットを指定して複数の返答を一括で行わないこと. 必ず「その指摘に対応したコミット」を指定すること.
+            - 非採用・別 Issue・要件変更など, コミット URL が不要な場合は `-` を渡すことで挿入をスキップする.
+            - コマンド例 (採用・コミット URL 付き):
                 ```bash
                 cat <<'EOF' > /tmp/reply_inline.md
                 ご指摘ありがとうございます. 〇〇を修正しました.
                 EOF
 
-                bash ${CLAUDE_SKILL_DIR}/scripts/reply_inline.sh 123 456789 /tmp/reply_inline.md
+                bash ${CLAUDE_SKILL_DIR}/scripts/reply_inline.sh 123 456789 /tmp/reply_inline.md abc1234
                 ```
             - コマンド例 (非採用・コミット URL 不要):
                 ```bash
@@ -64,7 +64,7 @@
                 ご指摘ありがとうございます. 今回は〇〇の理由で対応を見送ります.
                 EOF
 
-                bash ${CLAUDE_SKILL_DIR}/scripts/reply_inline.sh 123 456789 /tmp/reply_inline.md --no-commit
+                bash ${CLAUDE_SKILL_DIR}/scripts/reply_inline.sh 123 456789 /tmp/reply_inline.md -
                 ```
 - Issue の `完了条件` を実態に合わせて更新する.
     - スコープ変更が入る場合は, チェック状態だけを動かさず, 先に本文を更新すること.
