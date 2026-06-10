@@ -10,7 +10,7 @@
 - 対象 branch と worktree を特定する.
     - Issue のコメント履歴から branch 名と PR を確認する.
     - worktree path は Step 01 の配置規則に従う (`~/.worktrees/<リポジトリー名>-<ブランチ名>`).
-    - worktree がない場合は Step 03 に戻ること.
+    - worktree がない場合は Step 04 に戻ること.
 - 進捗コメントで状態を `指摘対応中` に記録する.
     - `bash ${CLAUDE_SKILL_DIR}/scripts/add_progress_comment.sh <issue番号> <body_file>` で投稿する.
 - 未対応の指摘がなくなるまで, 1 件ずつ「修正 → コミット → push → 返答」のサイクルを繰り返す. 複数の指摘をまとめて 1 コミットにしないこと. 1 件のサイクル (修正 → コミット → push → 返答) を完遂してから次の指摘に進むこと. 返答を先送りにして別の指摘へ進んではならない.
@@ -77,7 +77,7 @@
     - draft のまま継続 → `ドラフトレビュー中`.
     - draft → ready に切り替え → `レビュー待ち`.
     - `bash ${CLAUDE_SKILL_DIR}/scripts/add_progress_comment.sh <issue番号> <body_file>` で投稿する.
-- Step 06 に戻り, 再レビューを待つ.
+- Step 07 に戻り, 再レビューを待つ.
 
 ### Step 02 に戻すべきケース
 

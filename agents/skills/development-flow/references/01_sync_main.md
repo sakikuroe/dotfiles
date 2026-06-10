@@ -28,12 +28,14 @@
 
 Issue, branch, PR, worktree の存在状況から次の Step を判断する.
 
-- Issue あり, branch なし → Step 03.
-- branch あり, worktree なし → Step 03.
-- worktree あり, PR なし → Step 04 または 05.
-- draft / ready PR でレビュー待ち → Step 06.
-- レビュー指摘, CI 失敗, 競合あり → Step 07.
-- PR が `MERGED` → Step 08.
+- Issue あり, branch なし → Issue のコメント履歴で判定する.
+    - `方針レビュー待ち` が存在し, その後にユーザーの承認コメントがある → Step 04.
+    - 上記以外 (方針未投稿, または承認待ち) → Step 03.
+- branch あり, worktree なし → Step 04.
+- worktree あり, PR なし → Step 05 または 06.
+- draft / ready PR でレビュー待ち → Step 07.
+- レビュー指摘, CI 失敗, 競合あり → Step 08.
+- PR が `MERGED` → Step 09.
 
 ### worktree の配置先
 

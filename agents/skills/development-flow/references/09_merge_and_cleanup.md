@@ -18,13 +18,13 @@ PR がすでに merge 済みの場合は後処理だけを実行する.
     - `CLOSED` かつ未 merge の場合 → 中断し, 継続 / abandon をユーザーに確認すること.
     - `OPEN` の場合 → 以降の手順へ進む.
 - 作業用 worktree で `origin/main` に追従する.
-    - worktree が存在しない場合は Step 03 に戻ること.
+    - worktree が存在しない場合は Step 04 に戻ること.
     - `origin/main` に rebase する.
-    - rebase で HEAD が変わった場合は `push --force-with-lease` し, Step 06 に戻って checks / review を再確認すること.
+    - rebase で HEAD が変わった場合は `push --force-with-lease` し, Step 07 に戻って checks / review を再確認すること.
 - マージ可否を判定する.
     - Issue の `完了条件` がすべて達成済みであること.
     - PR が open, draft でない, レビュー承認済み, checks 通過, 競合なし.
-    - 条件を満たさない場合は Step 06 または Step 07 に戻ること.
+    - 条件を満たさない場合は Step 07 または Step 08 に戻ること.
 - マージ方法を決める.
     - merge queue を使わない場合:
         - 進捗コメントで状態を `マージ待ち` に記録する.
@@ -33,7 +33,7 @@ PR がすでに merge 済みの場合は後処理だけを実行する.
     - merge queue を使う場合:
         - 進捗コメントで状態を `merge queue 待ち` に記録する.
         - ユーザーへ queue 投入を依頼する. AI Agent が代行する場合は認証後に `gh pr merge --auto` を実行する.
-        - Step 06 へ戻り, `MERGED` になるまで待つ.
+        - Step 07 へ戻り, `MERGED` になるまで待つ.
 - マージ後の確認と後処理を行う.
     - PR が `MERGED` であることを確認する.
     - Issue のクローズ状態を確認する (`Closes` による自動クローズ, または手動).
