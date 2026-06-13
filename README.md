@@ -54,8 +54,8 @@ git config --file ~/.gitconfig.local user.email "you@example.com"
 
 ## エージェント設定
 
-Claude Code および Codex 向けのスキル設定は `agents/` で管理しています.
-各プロジェクトへの導入方法は [agents/README.md](./agents/README.md) を参照してください.
+Claude Code および Codex 向けのスキル設定は `.claude/` で管理しています.
+各プロジェクトへの導入方法は [.claude/README.md](./.claude/README.md) を参照してください.
 
 ## 反映確認
 
