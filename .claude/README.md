@@ -12,7 +12,7 @@
 
 ## 各プロジェクトへの導入
 
-`install.sh` を実行すると, このリポジトリ内の任意のディレクトリーを, 導入先プロジェクトの同じパスへ取得できます. たとえば `.claude/skills/coding-rules` を選択すると, 導入先プロジェクトの `.claude/skills/coding-rules/` にその内容が配置されます.
+`install.sh` を実行すると, このリポジトリ内の任意のディレクトリー・ファイルを, 導入先プロジェクトの同じパスへ取得できます. たとえば `.claude/skills/coding-rules` を選択すると, 導入先プロジェクトの `.claude/skills/coding-rules/` にその内容が配置されます.
 
 導入先プロジェクトのルートで, 次のコマンドを実行してください.
 
@@ -21,8 +21,8 @@ curl -fsSL https://raw.githubusercontent.com/sakikuroe/dotfiles/main/.claude/ins
   | bash -s -- https://github.com/sakikuroe/dotfiles.git
 ```
 
-`fzf` が利用可能な場合は, 取得するディレクトリーを一覧から選択できます. `fzf` が無い場合は, 番号を入力して選択します.
+`fzf` が利用可能な場合は, 取得するディレクトリー・ファイルを一覧から選択できます. `fzf` が無い場合は, GitHub 上で対象のディレクトリー・ファイルを開いたときの URL を貼り付けて指定します.
 
 ### 安全性
 
-`install.sh` は, 取得先のパスに既に同名のディレクトリーやファイルが存在する場合, 何もせずに終了します. 取得したディレクトリーは `.git/info/exclude` に追記され, git の管理対象外として扱われます.
+`install.sh` は, 取得先のパスに既に同名のディレクトリーやファイルが存在する場合, 何もせずに終了します. 取得したディレクトリー・ファイルは `.git/info/exclude` に追記され, git の管理対象外として扱われます.

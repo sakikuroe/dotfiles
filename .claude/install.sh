@@ -1,5 +1,5 @@
 #!/bin/bash
-# GitHubリポジトリ内の任意のディレクトリを、ローカルの同じパスに取得するスクリプト
+# GitHubリポジトリ内の任意のディレクトリ・ファイルを、ローカルの同じパスに取得するスクリプト
 set -euo pipefail
 # set -e          : コマンドが失敗したらスクリプト全体を即座に終了する
 # set -u          : 未定義の変数を使おうとしたらエラーにする
@@ -33,63 +33,78 @@ git clone --depth=1 --filter=blob:none --sparse "$REPO_URL" "$TMP_DIR" -q
 # --filter=blob:none : ファイルの中身(blob)はまだ取得しない=軽い
 # --sparse           : sparse-checkout モードで取得する
 # -q                 : 進捗ログを抑制する
-# この時点では「どこにどんなディレクトリがあるか」の情報だけが手に入る(APIは使わない)
+# この時点では「どこにどんなディレクトリ・ファイルがあるか」の情報だけが手に入る(APIは使わない)
 
-# --- 3. リポジトリ内の全ディレクトリを列挙する(中間ディレクトリも含む)---
-DIRS=$(git -C "$TMP_DIR" ls-tree -r --name-only HEAD \
-  | while IFS= read -r path; do
-      dir=$(dirname "$path")
-      # ファイルのパスを親へ1階層ずつたどり、全階層のディレクトリ名を出力する
-      while [ "$dir" != "." ]; do
-        echo "$dir"
-        dir=$(dirname "$dir")
-      done
-    done \
-  | sort -u)
-# ls-tree -r : ファイルのパスを再帰的に全部出す(これだけだと末端しか出ない)
-# dirname の繰り返しで .claude や .claude/skills のような中間ディレクトリも補う
-# sort -u    : 重複を除いて並べる
-
-# --- 4. ユーザーにディレクトリを選択させる ---
+# --- 3. ユーザーに取得するディレクトリ・ファイルを選択させる ---
 if command -v fzf > /dev/null 2>&1; then
-  # fzf があればそれで選択(矢印で移動 / Enter で決定 / Esc でキャンセル)
-  SELECTED=$(printf '%s\n' "$DIRS" \
-    | fzf --header "取得するディレクトリを選択(矢印で移動 / Enter で決定)" \
-          < /dev/tty) || SELECTED=""
-  # < /dev/tty : curl|bash では stdin がスクリプト本体なので、入力は端末から直接読む
+  # fzf があれば、リポジトリ内の全ディレクトリ・ファイルを一覧から選択できる
+  ENTRIES=$(git -C "$TMP_DIR" ls-tree -r --name-only HEAD \
+    | while IFS= read -r path; do
+        echo "$path"
+        dir="$path"
+        # ファイルのパスを親へ1階層ずつたどり、全階層のディレクトリ名も出力する
+        while [[ "$dir" == */* ]]; do
+          dir="${dir%/*}"
+          echo "$dir"
+        done
+      done \
+    | sort -u)
+  # ls-tree -r : ファイルのパスを再帰的に全部出す
+  # ${dir%/*}  : dirname 相当の処理を外部プロセスなしで行う(大規模リポジトリでも速い)
+  # sort -u    : 重複を除いて並べる
+
+  SELECTED=$(printf '%s\n' "$ENTRIES" \
+    | fzf --header "取得するディレクトリ・ファイルを選択(矢印で移動 / Enter で決定)") || SELECTED=""
+  # fzf はリストをパイプから受け取り、UI操作は内部で /dev/tty を使う
+  # ここで < /dev/tty を付けるとパイプ入力が上書きされ、リストが渡らなくなる
   # Esc 等でキャンセルすると fzf は非ゼロ終了するので || で空文字にして握りつぶす
 else
-  # fzf が無い場合は番号入力のフォールバック(動くが使いづらいので fzf 推奨)
-  echo "fzf が見つかりません。インストールすると快適に選択できます:" >&2
+  # fzf が無い場合は、リポジトリ全体の一覧を出さず、GitHub 上で開いたページの URL を貼ってもらう
+  # (大規模リポジトリでは全件一覧が膨大になり、列挙にも選択にも実用的でないため)
+  echo "fzf が見つかりません。インストールすると一覧から選択できます:" >&2
   echo "  https://github.com/junegunn/fzf" >&2
   echo "" >&2
-  echo "--- 取得可能なディレクトリ一覧 ---" >&2
-  mapfile -t DIR_ARRAY <<< "$DIRS"
-  # 改行区切りの一覧を配列に変換する
-  for i in "${!DIR_ARRAY[@]}"; do
-    printf "%3d) %s\n" "$((i+1))" "${DIR_ARRAY[$i]}" >&2
-    # 番号付きで一覧表示(リストは stderr に出して、戻り値の stdout と混ざらないようにする)
-  done
-  printf "番号を入力: " >&2
-  read -r num < /dev/tty
-  # 端末から番号を読む
-  [[ "$num" =~ ^[0-9]+$ ]] || { echo "番号が不正です" >&2; exit 1; }
-  # 数字以外が入力されたらエラーにする
-  SELECTED="${DIR_ARRAY[$((num-1))]:-}"
-  # 入力番号に対応するパスを取り出す(範囲外なら空になる)
+  echo "取得したいディレクトリ・ファイルを GitHub 上で開き、そのページの URL を貼り付けてください。" >&2
+  printf "URL (空入力でキャンセル): "
+  read -r url < /dev/tty
+  # 端末から URL を読む
+
+  if [ -z "$url" ]; then
+    SELECTED=""
+  else
+    BRANCH=$(git -C "$TMP_DIR" branch --show-current)
+    # クローンした既定ブランチ名(URL の /tree/<branch>/ や /blob/<branch>/ と一致させるために使う)
+    case "$url" in
+      */tree/"$BRANCH"/*) SELECTED="${url#*/tree/"$BRANCH"/}" ;;
+      */blob/"$BRANCH"/*) SELECTED="${url#*/blob/"$BRANCH"/}" ;;
+      # https://github.com/<owner>/<repo>/(tree|blob)/<branch>/<path> から <path> を取り出す
+      # tree はディレクトリ、blob はファイルのページ URL
+      *) echo "error: URL からパスを取り出せませんでした(branch: $BRANCH)" >&2; exit 1 ;;
+    esac
+    SELECTED="${SELECTED%/}"
+    # 末尾の / を除去する
+
+    TYPE=$(git -C "$TMP_DIR" cat-file -t "HEAD:$SELECTED" 2>/dev/null) \
+      || { echo "error: リポジトリ内に見つかりません: $SELECTED" >&2; exit 1; }
+    case "$TYPE" in
+      tree|blob) ;;
+      *) echo "error: 取得できない種類のパスです: $SELECTED ($TYPE)" >&2; exit 1 ;;
+    esac
+    # 取り出したパスがリポジトリ内のディレクトリ・ファイルとして実在するか確認する
+  fi
 fi
 
 [ -n "$SELECTED" ] || { echo "キャンセルしました" >&2; exit 0; }
 # 何も選ばれなかったら正常終了する
 
-# --- 5. すでにローカルに存在するなら何もしない ---
+# --- 4. すでにローカルに存在するなら何もしない ---
 # リポジトリ内のパス = ローカルでの取得先パス(構造をそのまま鏡写しにする)
 if [ -e "$SELECTED" ]; then
   echo "$SELECTED はすでに存在します"
   exit 0
 fi
 
-# --- 6. 取得してよいか最終確認する ---
+# --- 5. 取得してよいか最終確認する ---
 printf "%s を取得しますか? [y/N]: " "$SELECTED"
 read -r answer < /dev/tty
 case "$answer" in
@@ -97,17 +112,19 @@ case "$answer" in
   *) echo "中止しました"; exit 0 ;;    # それ以外は中止
 esac
 
-# --- 7. 選択したディレクトリの「実体」だけを取得する ---
-git -C "$TMP_DIR" sparse-checkout set "$SELECTED"
-# ここで初めて、対象ディレクトリのファイル本体がダウンロードされる
+# --- 6. 選択したパスの「実体」だけを取得する ---
+git -C "$TMP_DIR" sparse-checkout set --no-cone "/$SELECTED"
+# --no-cone : ディレクトリ・ファイルどちらも指定できるパターンとして扱う
+# 先頭の / : リポジトリルートからの完全一致に固定する(同名パスへの誤マッチを防ぐ)
+# ここで初めて、対象のファイル本体がダウンロードされる
 
-# --- 8. ローカルの同じパスへコピーする ---
+# --- 7. ローカルの同じパスへコピーする ---
 mkdir -p "$(dirname "$SELECTED")"
 # コピー先の親ディレクトリを用意する(cp は中間ディレクトリを自動では作らないため)
 cp -r "$TMP_DIR/$SELECTED" "$SELECTED"
 # 一時ディレクトリからローカルへコピー
 
-# --- 9. git の管理対象外にする ---
+# --- 8. git の管理対象外にする ---
 echo "$SELECTED" >> .git/info/exclude
 # .git/info/exclude に追記する
 # .gitignore と同じ効果だが、このファイル自体は git 管理されない
