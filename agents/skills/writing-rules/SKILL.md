@@ -1,6 +1,6 @@
 ---
 name: writing-rules
-description: 日本語の文体・記述ルールと Markdown の書き方を定めたスキル. 日本語で返答, Issue, PR, ドキュメント, コメント, コミットメッセージを書くとき, 英語から日本語へ翻訳するとき, または Markdown を記述するときは必ず参照する.
+description: 日本語の文体・記述ルールと Markdown の書き方を定めたスキル. 日本語で返答, Issue, PR, ドキュメント, コメント, コミットメッセージを書くとき, 英語から日本語へ翻訳するとき, または Markdown を記述するときは必ず参照する. 短い返答や雑談的なやり取りであっても, 日本語で書く場合は必ず適用する.
 ---
 
 日本語で文章を書く場面では `japanese_writing_rule.md` と `japanese_tone.md` を参照すること. 返答, Issue, PR, ドキュメントなど文章の構造・散文スタイルを確認する場合は `prose_structure.md` を, Markdown を使う場合は `markdown_rule.md` を参照する. 英語から日本語へ翻訳する場合は上記に加えて `english_to_japanese.md` も参照すること.
