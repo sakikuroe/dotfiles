@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # Install agents/skills as symlinks into ~/.claude/skills/ (global) or .claude/skills/ (project).
+# In --project mode, also symlinks agents/CLAUDE.md to <project>/.claude/CLAUDE.md if it does
+# not already exist, as a pointer to help Claude/Codex use the installed skills reliably.
 #
 # Usage:
 #   ./agents/install.sh            # install to ~/.claude/skills/ (global)
@@ -23,20 +25,28 @@ mkdir -p "$TARGET_DIR"
 linked=0
 skipped=0
 
+link_or_skip() {
+    local src="$1" target="$2" name="$3"
+
+    if [[ -e "$target" || -L "$target" ]]; then
+        echo "skip:   $name (already exists at $target)"
+        skipped=$((skipped + 1))
+    else
+        ln -s "$src" "$target"
+        echo "linked: $name -> $target"
+        linked=$((linked + 1))
+    fi
+}
+
 for skill_src in "$SKILLS_SRC"/*/; do
     [[ -d "$skill_src" ]] || continue
     skill_name="$(basename "$skill_src")"
-    target="$TARGET_DIR/$skill_name"
-
-    if [[ -e "$target" || -L "$target" ]]; then
-        echo "skip:   $skill_name (already exists at $target)"
-        skipped=$((skipped + 1))
-    else
-        ln -s "$skill_src" "$target"
-        echo "linked: $skill_name -> $target"
-        linked=$((linked + 1))
-    fi
+    link_or_skip "$skill_src" "$TARGET_DIR/$skill_name" "$skill_name"
 done
+
+if [[ "${1:-}" == "--project" ]]; then
+    link_or_skip "$SCRIPT_DIR/CLAUDE.md" "$(pwd)/.claude/CLAUDE.md" "CLAUDE.md"
+fi
 
 echo ""
 echo "scope: $scope"

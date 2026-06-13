@@ -33,9 +33,11 @@ cd /path/to/your-project
 /path/to/dotfiles/agents/install.sh --project
 ```
 
+このモードでは, `.claude/CLAUDE.md` が存在しない場合に限り, `agents/CLAUDE.md`（`.claude/skills/` 配下のスキルを積極的に確認し使用するよう指示する短いファイル）も symlink します. 既存の `.claude/CLAUDE.md` がある場合は何もしません.
+
 ### 安全性
 
 `install.sh` はインストール先に同名のディレクトリ・ファイル・symlink が存在する場合, 上書きせずにスキップします.
-既存の `.claude/` 配下の設定（`CLAUDE.md`, `settings.json` など）には一切触れません.
+`.claude/CLAUDE.md` への symlink（プロジェクトローカルインストール時のみ）を除き, 既存の `.claude/` 配下の設定（`settings.json` など）には一切触れません.
 
 スクリプトは冪等であり, 複数回実行しても安全です.
