@@ -28,10 +28,10 @@ TMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TMP_DIR"' EXIT
 # スクリプト終了時(正常・異常問わず)に一時ディレクトリを必ず削除する
 
-git clone --depth=1 --filter=blob:none --sparse "$REPO_URL" "$TMP_DIR" -q
+git clone --depth=1 --filter=blob:none --no-checkout "$REPO_URL" "$TMP_DIR" -q
 # --depth=1          : 最新コミットだけ取得(履歴は不要)
 # --filter=blob:none : ファイルの中身(blob)はまだ取得しない=軽い
-# --sparse           : sparse-checkout モードで取得する
+# --no-checkout      : チェックアウトを行わない(ルート直下のファイルも含め、この時点では実体を取得しない)
 # -q                 : 進捗ログを抑制する
 # この時点では「どこにどんなディレクトリ・ファイルがあるか」の情報だけが手に入る(APIは使わない)
 
@@ -116,6 +116,9 @@ esac
 git -C "$TMP_DIR" sparse-checkout set --no-cone "/$SELECTED"
 # --no-cone : ディレクトリ・ファイルどちらも指定できるパターンとして扱う
 # 先頭の / : リポジトリルートからの完全一致に固定する(同名パスへの誤マッチを防ぐ)
+
+git -C "$TMP_DIR" checkout -q
+# --no-checkout で省略していたチェックアウトをここで行う
 # ここで初めて、対象のファイル本体がダウンロードされる
 
 # --- 7. ローカルの同じパスへコピーする ---
