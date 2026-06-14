@@ -23,6 +23,10 @@ curl -fsSL https://raw.githubusercontent.com/sakikuroe/dotfiles/main/.claude/ins
 
 `fzf` が利用可能な場合は, 取得するディレクトリー・ファイルを一覧から選択できます. `fzf` が無い場合は, GitHub 上で対象のディレクトリー・ファイルを開いたときの URL を貼り付けて指定します.
 
+### `.claude/CLAUDE.md`
+
+`.claude/CLAUDE.md` は, `.claude/skills/` 配下のスキルを該当しうる場合に積極的に確認し使用するよう Claude Code に促す短い指示文です. 導入先プロジェクトに `.claude/CLAUDE.md` がまだ無い場合は, 同様に取得して配置することを推奨します.
+
 ### 安全性
 
 `install.sh` は, 取得先のパスに既に同名のディレクトリーやファイルが存在する場合, 何もせずに終了します. 取得したディレクトリー・ファイルは `.git/info/exclude` に追記され, git の管理対象外として扱われます.
