@@ -216,7 +216,6 @@ link_pairs=(
   "$DOT/config/nushell/env.nu" "$HOME/.config/nushell/env.nu"
   "$DOT/config/wezterm/wezterm.lua" "$HOME/.config/wezterm/wezterm.lua"
   "$DOT/config/git/config" "$HOME/.config/git/config"
-  "$DOT/config/git/ignore" "$HOME/.config/git/ignore"
 )
 
 # 定義したペアを順に反映します.
