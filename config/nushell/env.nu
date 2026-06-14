@@ -9,6 +9,11 @@
 let npm_global_bin = ($nu.home-dir | path join ".npm-global" "bin" | path expand)
 $env.PATH = ($env.PATH | where {|it| ($it | path expand) != $npm_global_bin } | prepend $npm_global_bin)
 
+# `~/.bashrc` の `# opencode` ブロック (`export PATH="$HOME/.opencode/bin:$PATH"`) を `nu` でも再現します.
+# `npm_global_bin` より後に prepend し, `opencode` を優先的に解決します.
+let opencode_bin = ($nu.home-dir | path join ".opencode" "bin" | path expand)
+$env.PATH = ($env.PATH | where {|it| ($it | path expand) != $opencode_bin } | prepend $opencode_bin)
+
 # PWD をホーム配下の場合は "~" に置換して返します.
 def pretty_pwd [] {
   let home = $nu.home-dir
