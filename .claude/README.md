@@ -13,6 +13,7 @@
 - `review-response`: レビュー対応.
 - `git-commit`: コミットの作法 (メッセージ書式と運用原則). git-committer サブエージェントが参照する.
 - `writing-rules`: 日本語の文体・記述ルールと Markdown の書き方.
+- `documentation`: 機能コード以外の開発情報の置き場を定める. Issue・PR・ADR・docs・CHANGELOG に何を書き, どこには書かないかの置き場マップと, ADR・Diátaxis・CHANGELOG の運用.
 
 ## サブエージェント
 
