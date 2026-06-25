@@ -15,13 +15,13 @@ GitHub Issue を要求の起点とし, AI Agent が実装, 検証, git/gh 操作
 
 先頭から順に進める. 各スキルは単独でも利用できるが, 1 Issue を着手から merge まで通す場合はこの順序に従う.
 
-- default branch を同期する — [references/sync_main.md](./references/sync_main.md).
-- Issue を起票し, 実装方針の承認を得る — [issue-planning](../issue-planning/SKILL.md).
-- 作業ブランチと worktree を作成する — [references/create_branch.md](./references/create_branch.md).
-- 作業用 worktree で実装, 検証, コミットを行う — [implementation](../implementation/SKILL.md).
-- push して default branch 向け PR を作成する — [pr-creation](../pr-creation/SKILL.md).
-- PR の状態を判定し, レビュー指摘や CI 不具合に対応する — [review-response](../review-response/SKILL.md).
-- マージを依頼し, 後処理を行う — [references/merge_and_cleanup.md](./references/merge_and_cleanup.md).
+1. default branch を同期する — [references/sync_main.md](./references/sync_main.md).
+2. Issue を起票し, 実装方針の承認を得る — [issue-planning](../issue-planning/SKILL.md).
+3. 作業ブランチと worktree を作成する — [references/create_branch.md](./references/create_branch.md).
+4. 作業用 worktree で実装, 検証, コミットを行う — [implementation](../implementation/SKILL.md).
+5. push して default branch 向け PR を作成する — [pr-creation](../pr-creation/SKILL.md).
+6. PR の状態を判定し, レビュー指摘や CI 不具合に対応する — [review-response](../review-response/SKILL.md).
+7. マージを依頼し, 後処理を行う — [references/merge_and_cleanup.md](./references/merge_and_cleanup.md).
 
 中断・再開する場合は, Issue のコメント履歴 (ブランチ名・PR・状態) と `git worktree list` / `gh pr view` の現在状態から, 上記のどの段階にいるかを判断して該当段階から進める.
 
