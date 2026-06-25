@@ -6,122 +6,35 @@ description: GitHub Issue を起点とする AI 主導の開発フロー. 開発
 ## 概要
 
 GitHub Issue を要求の起点とし, AI Agent が実装, 検証, git/gh 操作を担う開発フロー.
-元の clone を制御用 worktree (`main` 固定) とし, 実装は `~/.worktrees/` 配下の作業用 worktree で行う.
+元の clone を制御用 worktree (default branch 固定) とし, 実装は `~/.worktrees/` 配下の作業用 worktree で行う.
 対象範囲は 1 Issue の着手準備から merge 完了まで.
 
-## 前提
-
-- default branch が `main` の GitHub リポジトリーであること.
-- `main` への直接 push は行わず, 作業ブランチと PR を経由すること.
-- 初回着手時は `gh auth status` とリポジトリーの保護ルール (必須承認数, status checks, merge queue の有無) を確認すること.
-- 単独開発で他者承認が必須の保護ルールがある場合は, 別アカウントかルール調整が先に必要.
-
-## 役割
-
-- AI Agent: Issue 草案, 実装, 検証, git/gh 操作, レビュー指摘への返答.
-- ユーザー: 承認と認証, GitHub Web レビュー, 最終マージ判断.
-
-## 認証ルール
-
-以下の操作のみ, ユーザーの認証を得てから実行すること.
-
-- `gh issue create`
-- `gh pr create`, `gh pr merge`
-- PR を draft → ready に切り替える操作
-- レビュー依頼の追加・再設定
-- `git push origin --delete <branch>` (リモートブランチの削除)
-
-上記以外 (push, コミット, Issue 進捗更新, PR コメント) は認証不要.
-
-## AI Agent の署名
-
-AI Agent が GitHub 上に投稿するすべてのテキスト (PR 本文, PR コメント, Issue コメント, review thread への返答) の末尾に, 以下の署名を付けること.
-
-```
-*This comment was posted by AI Agent.*
-```
-
-各スクリプトが本文ファイルの末尾に署名を自動付加するため, 本文ファイルに署名を含める必要はない. ただし, `gh` コマンドを直接使って本文を投稿する場合は, ファイルの末尾に署名を含めること.
-
-## スクリプト
-
-操作ミスが起きやすい手順はスクリプトに委譲する. `${CLAUDE_SKILL_DIR}` はこのファイルのディレクトリーに展開される.
-
-- [scripts/create_worktree.sh](./scripts/create_worktree.sh): branch と worktree を命名規則通りに作成・再利用する (Step 04).
-- [scripts/create_issue.sh](./scripts/create_issue.sh): タイトルと本文ファイルで Issue を作成する (Step 02).
-- [scripts/post_implementation_plan.sh](./scripts/post_implementation_plan.sh): 実装方針コメントを Issue に投稿する (Step 03).
-- [scripts/update_issue_body.sh](./scripts/update_issue_body.sh): Issue 本文をファイル内容で置き換える. 完了条件や背景・動機など, Issue description 内の節の書き換えに使う.
-- [scripts/add_progress_comment.sh](./scripts/add_progress_comment.sh): Issue に進捗コメントを追加投稿する. 状態変化のたびに呼ぶ (Step 03, 04, 05, 06, 08, 09).
-- [scripts/add_reviewer.sh](./scripts/add_reviewer.sh): レビュー依頼を追加する (Step 06, 08).
-- [scripts/fetch_reviews.sh](./scripts/fetch_reviews.sh): PR 状態 / 全体レビュー / インライン review comment を 1 回で取得し JSON で返す (Step 07, 08).
-- [scripts/reply_review.sh](./scripts/reply_review.sh): レビュー全体へ引用付きで返答する (Step 08).
-- [scripts/reply_inline.sh](./scripts/reply_inline.sh): インライン review comment に返答する. 本文末尾に署名を自動付加する. コミットハッシュを指定するとそのコミットの URL を署名直前に挿入する. ハッシュの代わりに `-` を渡すとコミット URL の挿入をスキップする. ハッシュ指定時は該当指摘に対応したコミットを明示的に指定すること (Step 08).
-- [scripts/set_ready.sh](./scripts/set_ready.sh): draft PR を ready に切り替える (Step 08).
-- [scripts/cleanup.sh](./scripts/cleanup.sh): マージ後の後処理を正しい順序で実行する (Step 09).
-- [scripts/commit_with_signature.sh](./scripts/commit_with_signature.sh): コミットメッセージ末尾に `Co-authored-by: AI Agent` trailer を追加して `git commit` する (Step 05).
-- [scripts/create_pr.sh](./scripts/create_pr.sh): 本文末尾に署名を自動付加して PR を作成する (Step 06).
-
-## 本文を扱うコマンドの原則
-
-`gh issue create`, `gh pr create`, `gh pr comment`, 各スクリプトなど, 長い本文を渡すコマンドはすべてファイル経由 (`--body-file <file>` または `<body_file>` 引数) で渡すこと.
-シェルのヒアドキュメント内でバッククォートをエスケープする事故を防ぐためである.
-
-本文は次の手順で渡す.
-
-1. ヒアドキュメントで一時ファイルに本文を書き出す.
-   ```bash
-   cat <<'EOF' > /tmp/body.md
-   ...本文...
-   EOF
-   ```
-   `<<'EOF'` (シングルクォート) で書くと, バッククォートやドル記号がそのまま書き込まれるため,
-   コードブロック (` ``` `) も安全に含められる.
-2. ファイルを `--body-file` または `<body_file>` 引数として渡す.
+本スキルは全体の順序を統括し, ワークスペースの準備 (default branch 同期, 作業ブランチ・worktree の作成) と マージ・後処理を直接担う. 途中の各段階 (Issue 起票, 実装, PR 作成, レビュー対応) は対応するスキルを参照すること.
 
 ## 手順
 
-初回は Step 01 から順に進める. 再開時は Step 01 で判定し, 該当 Step から再開する.
+先頭から順に進める. 各スキルは単独でも利用できるが, 1 Issue を着手から merge まで通す場合はこの順序に従う.
 
-- [01_sync_main.md](./references/01_sync_main.md): 新規着手か再開かを判定し, 新規なら `main` を同期する.
-- [02_create_issue.md](./references/02_create_issue.md): ユーザーの要求から Issue を作成する.
-- [03_review_implementation_plan.md](./references/03_review_implementation_plan.md): 実装方針をコメントで投稿し, ユーザーの承認を得る.
-- [04_create_branch.md](./references/04_create_branch.md): 作業ブランチと worktree を作成する.
-- [05_implement_and_commit.md](./references/05_implement_and_commit.md): 作業用 worktree で実装, 検証, コミットを行う.
-- [06_push_and_open_pr.md](./references/06_push_and_open_pr.md): 履歴を整形し, `main` 向け PR を作成する.
-- [07_wait_user_review.md](./references/07_wait_user_review.md): PR の状態から次の Step を判定する.
-- [08_address_review.md](./references/08_address_review.md): レビュー指摘に 1 件ずつ対応する.
-- [09_merge_and_cleanup.md](./references/09_merge_and_cleanup.md): マージ依頼と後処理を行う.
+1. default branch を同期する — [references/sync_main.md](./references/sync_main.md).
+2. Issue を起票し, 実装方針の承認を得る — [issue-planning](../issue-planning/SKILL.md).
+3. 作業ブランチと worktree を作成する — [references/create_branch.md](./references/create_branch.md).
+4. 作業用 worktree で実装, 検証, コミットを行う — [implementation](../implementation/SKILL.md).
+5. push して default branch 向け PR を作成する — [pr-creation](../pr-creation/SKILL.md).
+6. PR の状態を判定し, レビュー指摘や CI 不具合に対応する — [review-response](../review-response/SKILL.md).
+7. マージを依頼し, 後処理を行う — [references/merge_and_cleanup.md](./references/merge_and_cleanup.md).
 
-## 進捗の仕様
+中断・再開する場合は, Issue のコメント履歴 (ブランチ名・PR・状態) と `git worktree list` / `gh pr view` の現在状態から, 上記のどの段階にいるかを判断して該当段階から進める.
 
-Issue の description には進捗セクションを書かない. ブランチ名・PR・状態変化はすべて `add_progress_comment.sh` でコメントを追記することで記録する. description は作成時に一度書くだけで, 以後書き換えない.
+## 参照文書
 
-### 進捗コメントの形式
+- [references/sync_main.md](./references/sync_main.md): default branch を origin と同期し, worktree 配置規則を定める.
+- [references/create_branch.md](./references/create_branch.md): 作業ブランチと worktree を作成する.
+- [references/merge_and_cleanup.md](./references/merge_and_cleanup.md): マージ依頼と後処理を行う.
 
-各イベントで以下の形式のコメントを投稿すること. `add_progress_comment.sh` が末尾に署名を自動付加する.
+## スクリプト
 
-```
-<記録内容>
-```
+操作ミスが起きやすい手順はスクリプトに委譲する.
 
-記録内容の例:
-- ブランチ作成時: `ブランチ: improvement/123-add-search`
-- 実装開始時: `状態: 実装中`
-- PR 作成時: `PR: https://github.com/.../pull/55`
-- レビュー待ち: `状態: レビュー待ち`
-
-再開時は Issue のコメント履歴から最新のブランチ名・PR・状態を読み取ること.
-
-### 状態値
-
-AI Agent が作業中の状態は「〜中」, 外部の応答を待つ状態は「〜待ち」で表す.
-
-- `方針レビュー待ち` — AI Agent が実装方針コメントを投稿し, ユーザーの承認を待っている.
-- `実装中` — 実装, 検証を進めている.
-- `ドラフトレビュー中` — draft PR で相談や途中レビューを受けている.
-- `レビュー待ち` — ready PR で正式レビューを待っている.
-- `指摘対応中` — レビュー指摘や CI 不具合に対応している.
-- `再レビュー待ち` — 指摘対応を反映し, 再レビューを待っている.
-- `マージ待ち` — ユーザーへ最終マージを依頼済み.
-- `merge queue 待ち` — merge queue に投入済み.
-- `完了` — merge と後処理を確認済み.
+- [scripts/create_worktree.sh](./scripts/create_worktree.sh): 作業ブランチと worktree を命名規則通りに作成・再利用する.
+- [scripts/cleanup.sh](./scripts/cleanup.sh): マージ後の後処理 (remote branch 削除 → worktree 削除 → local branch 削除 → default branch 同期) を順に実行する.
+- [scripts/add_progress_comment.sh](./scripts/add_progress_comment.sh): Issue に進捗コメントを追加投稿する.

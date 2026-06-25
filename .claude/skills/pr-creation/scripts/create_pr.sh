@@ -29,8 +29,11 @@ SEND_FILE=$(mktemp)
 trap 'rm -f "$SEND_FILE"' EXIT
 bash "${SCRIPT_DIR}/_append_signature.sh" "$BODY_FILE" > "$SEND_FILE"
 
+BASE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
+BASE_BRANCH="${BASE_BRANCH:-main}"
+
 gh pr create \
     --title "$TITLE" \
     --body-file "$SEND_FILE" \
     --head "$HEAD_BRANCH" \
-    --base main
+    --base "$BASE_BRANCH"

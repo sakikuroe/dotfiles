@@ -36,31 +36,31 @@ Issue 本文は変更せず, 方針はコメントとして追記する.
 
         ...
         EOF
-        bash ${CLAUDE_SKILL_DIR}/scripts/post_implementation_plan.sh <issue番号> /tmp/plan.md
+        bash .claude/skills/issue-planning/scripts/post_implementation_plan.sh <issue番号> /tmp/plan.md
         ```
 - 進捗コメントで状態を `方針レビュー待ち` に記録する.
-    - `bash ${CLAUDE_SKILL_DIR}/scripts/add_progress_comment.sh <issue番号> <body_file>` で投稿する.
+    - `bash .claude/skills/issue-planning/scripts/add_progress_comment.sh <issue番号> <body_file>` で投稿する.
     - コマンド例:
         ```bash
         cat <<'EOF' > /tmp/progress.md
         状態: 方針レビュー待ち
         EOF
-        bash ${CLAUDE_SKILL_DIR}/scripts/add_progress_comment.sh <issue番号> /tmp/progress.md
+        bash .claude/skills/issue-planning/scripts/add_progress_comment.sh <issue番号> /tmp/progress.md
         ```
 - ユーザーの承認または修正依頼を待つ.
-    - 承認が得られたら Step 04 へ進む.
+    - 承認が得られたら作業ブランチと worktree の作成へ進む.
     - 修正依頼があった場合は方針を見直し, コメントを投稿し直す.
 
 ## 原則
 
 - Issue 本文は変更しないこと. 方針はコメントとして追記する.
-- 方針が固まる前にブランチを切らないこと. ブランチ作成は Step 04 で行う.
+- 方針が固まる前にブランチを切らないこと. ブランチ作成は方針承認後に行う.
 - 修正依頼があった場合は, 新しいコメントを投稿し直して再び承認を待つこと.
 - 判断に迷う場合は作業を中断し, ユーザーに報告・相談すること.
 
-## この phase の完了条件
+## この段階の完了条件
 
 - [ ] 実装方針コメントが Issue に投稿されている.
 - [ ] 進捗に `状態: 方針レビュー待ち` が記録されている.
 - [ ] ユーザーから承認が得られている.
-- [ ] Step 04 を開始できる状態になっている.
+- [ ] 作業ブランチと worktree の作成に進める状態になっている.

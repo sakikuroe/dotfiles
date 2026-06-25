@@ -41,8 +41,10 @@ elif [[ "$BRANCH_REMOTE" -gt 0 ]]; then
     echo "tracking remote branch"
     git worktree add --track -b "$BRANCH" "$WORKTREE_PATH" "origin/$BRANCH"
 else
-    echo "creating new branch from origin/main"
-    git worktree add -b "$BRANCH" "$WORKTREE_PATH" origin/main
+    DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
+    DEFAULT_BRANCH="${DEFAULT_BRANCH:-main}"
+    echo "creating new branch from origin/$DEFAULT_BRANCH"
+    git worktree add -b "$BRANCH" "$WORKTREE_PATH" "origin/$DEFAULT_BRANCH"
 fi
 
 echo "done: $WORKTREE_PATH"

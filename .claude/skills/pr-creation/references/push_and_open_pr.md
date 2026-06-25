@@ -2,8 +2,8 @@
 
 ## 概要
 
-作業用 worktree のブランチを origin へ push し, `main` 向けの PR を作成する.
-初回 push 前には `origin/main` を基点に履歴を整形する.
+作業用 worktree のブランチを origin へ push し, default branch 向けの PR を作成する.
+初回 push 前には origin の default branch を基点に履歴を整形する.
 既存の open PR がある場合は再利用する.
 
 ## 手順
@@ -17,12 +17,12 @@
         git fetch origin --prune
         git status   # 未コミット差分がないことを確認
         ```
-- `origin/main` の存在を確認する.
+- origin の default branch が存在することを確認する.
 - 未コミット差分がないことを確認する.
     - 意図しない差分がある場合は, コミット / 破棄 / 退避の方針を決めてから進むこと.
 - push 方法を決める.
     - remote に branch が未公開の場合 → 公開前に履歴を整形してから push する.
-        - `git rebase origin/main` → `git reset --soft origin/main` → 適切な粒度で commit を作り直す.
+        - origin の default branch に `git rebase` → `git reset --soft` → 適切な粒度で commit を作り直す.
     - 公開済みの場合 → 通常 push する.
     - コマンド例:
         ```bash
@@ -39,10 +39,10 @@
 - PR の内容をユーザーへ提示し, 認証を得る.
     - PR タイトル, 本文, draft / ready の別を提示する.
 - ユーザーの認証後に PR を作成または更新する.
-    - 実行場所: メインリポジトリー. `gh pr create` はカレントブランチから PR を作るため, worktree から実行すると別 Bash セッションで cwd がリセットされて main から作ろうとしてエラーになる事故が起きやすい. メインリポジトリーから `--head <branch>` で明示するのが安全.
+    - 実行場所: メインリポジトリー. `gh pr create` はカレントブランチから PR を作るため, worktree から実行すると別 Bash セッションで cwd がリセットされて default branch から作ろうとしてエラーになる事故が起きやすい. メインリポジトリーから `--head <branch>` で明示するのが安全.
     - PR 本文は `templates/pr.md` を参照して書くこと. ヒアドキュメントで一時ファイルに書き出してから `--body-file` で渡すこと.
     - タイトルにバッククォートを含む場合, `--title "..."` とダブルクォートで渡すとシェルがコマンド置換として解釈し壊れる. 変数経由かシングルクォートで渡すこと.
-    - PR 作成は `bash ${CLAUDE_SKILL_DIR}/scripts/create_pr.sh <タイトル> <body_file> <head_branch>` を使うこと. 本文末尾に署名を自動付加する.
+    - PR 作成は `bash .claude/skills/pr-creation/scripts/create_pr.sh <タイトル> <body_file> <head_branch>` を使うこと. 本文末尾に署名を自動付加する.
     - コマンド例:
         ```bash
         # 実行場所: メインリポジトリー
@@ -60,11 +60,11 @@
         ...
         EOF
 
-        bash ${CLAUDE_SKILL_DIR}/scripts/create_pr.sh "<タイトル>" /tmp/pr_body.md <branch>
+        bash .claude/skills/pr-creation/scripts/create_pr.sh "<タイトル>" /tmp/pr_body.md <branch>
         ```
 - ready PR の場合, レビュー依頼先をユーザーに確認する.
     - 「レビューを依頼するユーザーがいれば GitHub ユーザー名を教えてください」と尋ねる.
-    - ユーザーが指定した場合は `bash ${CLAUDE_SKILL_DIR}/scripts/add_reviewer.sh <PR番号> <username>` で依頼する.
+    - ユーザーが指定した場合は `bash .claude/skills/pr-creation/scripts/add_reviewer.sh <PR番号> <username>` で依頼する.
         - 実行場所: メインリポジトリー (リポジトリー判定に `gh repo view` を使うため worktree 内でも可).
         - `gh pr edit` が `projectCards` の GraphQL エラーで失敗する場合は REST API を使う.
           例: `gh api repos/<owner>/<repo>/pulls/<number> --method PATCH --field title='...' --jq '.title'`
@@ -80,9 +80,9 @@
 - ユーザーの認証を得ずに PR を作成しないこと.
 - 判断に迷う場合は作業を中断し, ユーザーに報告・相談すること.
 
-## この phase の完了条件
+## この段階の完了条件
 
 - [ ] 作業ブランチが origin に push 済みである.
-- [ ] PR が `main` 向けに作成または再利用されている.
+- [ ] PR が default branch 向けに作成または再利用されている.
 - [ ] 進捗コメントが PR 状態と一致している.
-- [ ] Step 07 を開始できる状態になっている.
+- [ ] review-response スキルを開始できる状態になっている.
