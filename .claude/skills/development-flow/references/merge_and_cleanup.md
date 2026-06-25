@@ -53,10 +53,10 @@ PR がすでに merge 済みの場合は後処理だけを実行する.
 
 後処理は以下の順で行うこと. worktree を先に削除しないと local branch の削除が失敗する.
 
-1. remote branch の削除.
-2. worktree の削除.
-3. local branch の削除.
-4. default branch の同期.
+- remote branch の削除.
+- worktree の削除.
+- local branch の削除.
+- default branch の同期.
 
 ### local branch 削除の注意
 
