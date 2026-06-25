@@ -36,16 +36,16 @@ Issue 本文は変更せず, 方針はコメントとして追記する.
 
         ...
         EOF
-        bash ${CLAUDE_SKILL_DIR}/scripts/post_implementation_plan.sh <issue番号> /tmp/plan.md
+        bash .claude/skills/issue-planning/scripts/post_implementation_plan.sh <issue番号> /tmp/plan.md
         ```
 - 進捗コメントで状態を `方針レビュー待ち` に記録する.
-    - `bash ${CLAUDE_SKILL_DIR}/scripts/add_progress_comment.sh <issue番号> <body_file>` で投稿する.
+    - `bash .claude/skills/issue-planning/scripts/add_progress_comment.sh <issue番号> <body_file>` で投稿する.
     - コマンド例:
         ```bash
         cat <<'EOF' > /tmp/progress.md
         状態: 方針レビュー待ち
         EOF
-        bash ${CLAUDE_SKILL_DIR}/scripts/add_progress_comment.sh <issue番号> /tmp/progress.md
+        bash .claude/skills/issue-planning/scripts/add_progress_comment.sh <issue番号> /tmp/progress.md
         ```
 - ユーザーの承認または修正依頼を待つ.
     - 承認が得られたら作業ブランチと worktree の作成へ進む.

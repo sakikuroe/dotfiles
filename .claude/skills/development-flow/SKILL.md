@@ -33,7 +33,7 @@ GitHub Issue を要求の起点とし, AI Agent が実装, 検証, git/gh 操作
 
 ## スクリプト
 
-操作ミスが起きやすい手順はスクリプトに委譲する. `${CLAUDE_SKILL_DIR}` はこのファイルのディレクトリーに展開される.
+操作ミスが起きやすい手順はスクリプトに委譲する.
 
 - [scripts/create_worktree.sh](./scripts/create_worktree.sh): 作業ブランチと worktree を命名規則通りに作成・再利用する.
 - [scripts/cleanup.sh](./scripts/cleanup.sh): マージ後の後処理 (remote branch 削除 → worktree 削除 → local branch 削除 → main 同期) を順に実行する.

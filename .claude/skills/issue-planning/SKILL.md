@@ -20,7 +20,7 @@ description: GitHub Issue の起票と実装計画の作成・提示を担うス
 
 ## スクリプト
 
-操作ミスが起きやすい手順はスクリプトに委譲する. `${CLAUDE_SKILL_DIR}` はこのファイルのディレクトリーに展開される.
+操作ミスが起きやすい手順はスクリプトに委譲する.
 
 - [create_issue.sh](./scripts/create_issue.sh): タイトルと本文ファイルで Issue を作成する.
 - [post_implementation_plan.sh](./scripts/post_implementation_plan.sh): 実装方針コメントを Issue に投稿する.
