@@ -9,8 +9,8 @@
 
 - 対象 branch と worktree を特定する.
     - Issue のコメント履歴から branch 名と PR を確認する.
-    - worktree path は Step 01 の配置規則に従う (`~/.worktrees/<リポジトリー名>-<ブランチ名>`).
-    - worktree がない場合は Step 04 に戻ること.
+    - worktree path は `~/.worktrees/<リポジトリー名>-<ブランチ名>` とする (ブランチ名の `/` は `-` に置換).
+    - worktree がない場合は, 先に作業 worktree を用意すること.
 - 進捗コメントで状態を `指摘対応中` に記録する.
     - `bash ${CLAUDE_SKILL_DIR}/scripts/add_progress_comment.sh <issue番号> <body_file>` で投稿する.
 - 未対応の指摘がなくなるまで, 1 件ずつ「修正 → コミット → push → 返答」のサイクルを繰り返す. 複数の指摘をまとめて 1 コミットにしないこと. 1 件のサイクル (修正 → コミット → push → 返答) を完遂してから次の指摘に進むこと. 返答を先送りにして別の指摘へ進んではならない.
@@ -21,16 +21,12 @@
         - `git show <original_commit_id>:<path> | nl -ba` で comment 時点のコードを確認してから修正に入る.
         - コメント本文, パス, commit, 行番号, 対象コードの抜粋をセットで整理する.
     - 方針をユーザーへ提示し, 採否を確定する.
-        - 採用 / 非採用 / 別 Issue へ送る / 要件変更として Step 02 に戻す.
+        - 採用 / 非採用 / 別 Issue へ送る / 要件変更として issue-planning スキルに戻す.
     - 採用の場合 → 作業用 worktree で修正し, 検証する.
         - 実行場所: 作業用 worktree (`~/.worktrees/<repo>-<branch>`).
     - コミットし, push する.
-        - 通常 → `git push`, 履歴書き換え → `git push --force-with-lease`.
-        - コミット時は `bash ${CLAUDE_SKILL_DIR}/scripts/commit_with_signature.sh "<メッセージ>"` を使うこと.
-            - コマンド例:
-                ```bash
-                bash ${CLAUDE_SKILL_DIR}/scripts/commit_with_signature.sh "Fix: 〇〇を修正した"
-                ```
+        - コミットは `git-committer` サブエージェントに委託する. 作業用 worktree のパスと「この指摘への修正だけを 1 コミットにまとめる」意図を渡し, 作成されたコミットのハッシュとメッセージを受け取る. このハッシュを後段のインライン返答で使う.
+        - push はこのスキルが行う. 通常 → `git push`, 履歴書き換え → `git push --force-with-lease`.
         - 次の指摘へ進む前に必ず push まで完了させること.
     - 該当 review thread または PR コメントへ quote reply で返答する.
 - 返答本文の末尾には必ず署名 `*This comment was posted by AI Agent.*` を含めること. スクリプト (`reply_review.sh`, `reply_inline.sh`) が返答本文の末尾に署名を自動付加するため, 本文ファイルに署名を含める必要はない.
@@ -77,11 +73,11 @@
     - draft のまま継続 → `ドラフトレビュー中`.
     - draft → ready に切り替え → `レビュー待ち`.
     - `bash ${CLAUDE_SKILL_DIR}/scripts/add_progress_comment.sh <issue番号> <body_file>` で投稿する.
-- Step 07 に戻り, 再レビューを待つ.
+- wait_user_review に戻り, 再レビューを待つ.
 
-### Step 02 に戻すべきケース
+### issue-planning スキルに戻すべきケース
 
-以下に該当する場合は, 現 Issue 内で処理せず Step 02 に戻って Issue を見直すこと.
+以下に該当する場合は, 現 Issue 内で処理せず issue-planning スキルに戻って Issue を見直すこと.
 
 - 指摘が新機能追加や別要件の持ち込みになっている.
 - 既存の `完了条件` では受け止めきれない.
@@ -95,7 +91,7 @@
 - 合意した内容だけを反映し, Issue のスコープを勝手に広げないこと.
 - 判断に迷う場合は作業を中断し, ユーザーに報告・相談すること.
 
-## この phase の完了条件
+## この段階の完了条件
 
 - [ ] 指摘ごとの採否がユーザー確認済みである.
 - [ ] 修正が作業用 worktree で検証済みである.
