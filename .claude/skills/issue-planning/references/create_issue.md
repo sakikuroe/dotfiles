@@ -22,7 +22,7 @@ Issue は以降のすべての工程の基準となるため, 要求・完了条
 - 草案が固まったら, 次の点を最終確認する.
     - タイトルだけで第三者に内容が伝わるか.
     - `完了条件` が客観的に判定でき, 曖昧語を含んでいないか.
-- ユーザーの認証を得てから `bash ${CLAUDE_SKILL_DIR}/scripts/create_issue.sh` を実行する.
+- ユーザーの認証を得てから `bash .claude/skills/issue-planning/scripts/create_issue.sh` を実行する.
     - 実行場所はメインリポジトリーでも worktree でも構わない.
     - 本文はヒアドキュメントで一時ファイルに書き出してから渡すこと. スクリプトが `--body-file` を必須としているため, シェル内でバッククォートをエスケープする事故を防げる.
     - コマンド例:
@@ -37,9 +37,9 @@ Issue は以降のすべての工程の基準となるため, 要求・完了条
         - [ ]
         EOF
 
-        bash ${CLAUDE_SKILL_DIR}/scripts/create_issue.sh "<タイトル>" /tmp/issue_body.md
+        bash .claude/skills/issue-planning/scripts/create_issue.sh "<タイトル>" /tmp/issue_body.md
         ```
-- 作成後は結果 (URL, 番号, 本文) が意図どおりであることを確認する. なお, Issue 本文の内容を後から更新する場合は `bash ${CLAUDE_SKILL_DIR}/scripts/update_issue_body.sh <issue番号> <body_file>` を使うこと.
+- 作成後は結果 (URL, 番号, 本文) が意図どおりであることを確認する. なお, Issue 本文の内容を後から更新する場合は `bash .claude/skills/issue-planning/scripts/update_issue_body.sh <issue番号> <body_file>` を使うこと.
 
 ## Issue 本文の書き方
 

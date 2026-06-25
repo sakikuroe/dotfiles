@@ -110,7 +110,7 @@ development-flow が直接担う段階の手順.
 
 ## スクリプト
 
-操作ミスが起きやすい手順はスクリプトに委譲する. `${CLAUDE_SKILL_DIR}` はこのファイルのディレクトリーに展開される.
+操作ミスが起きやすい手順はスクリプトに委譲する.
 
 - [scripts/create_worktree.sh](./scripts/create_worktree.sh): branch と worktree を命名規則通りに作成・再利用する.
 - [scripts/cleanup.sh](./scripts/cleanup.sh): マージ後の後処理を正しい順序で実行する (remote branch 削除 → worktree 削除 → local branch 削除 → main 同期).
