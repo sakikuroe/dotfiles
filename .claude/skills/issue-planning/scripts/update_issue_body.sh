@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Usage: update_issue_body.sh <issue_number> <body_file>
 #
-# 指定した Issue 番号の本文をファイル内容で置き換える.
-# description 本文の節 (完了条件, 背景・動機など) の内容変更に使う.
-# ファイル経由で渡すパターンを強制する wrapper として用意した.
+# 指定した Issue 番号の本文をファイル内容で置き換える。
+# description 本文の節 (完了条件、背景・動機など) の内容変更に使う。
+# ファイル経由で渡すパターンを強制する wrapper として用意した。
 
 set -euo pipefail
 

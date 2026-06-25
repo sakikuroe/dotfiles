@@ -2,8 +2,8 @@
 # Usage: commit_with_signature.sh <message>
 #        commit_with_signature.sh --amend
 #
-# メッセージ末尾に Co-authored-by: AI Agent を追加して git commit する.
-# 1行の要約 (Subject) を維持し, trailer は空行を挟んで末尾に追加する.
+# メッセージ末尾に Co-authored-by: AI Agent を追加して git commit する。
+# 1行の要約 (Subject) を維持し、trailer は空行を挟んで末尾に追加する。
 #
 # 例:
 #   commit_with_signature.sh "Fix: メモリリークを修正した"

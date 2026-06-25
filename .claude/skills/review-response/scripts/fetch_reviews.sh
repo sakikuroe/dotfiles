@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 # Usage: fetch_reviews.sh <pr_number>
 #
-# PR の状態 / 全体レビュー / インライン review comment を 1 回で取得し,
-# 統合した JSON を出力する.
+# PR の状態 / 全体レビュー / インライン review comment を 1 回で取得し、
+# 統合した JSON を出力する。
 #
-# gh pr view --json reviews にはインライン review comment が含まれない.
-# 別 API (`gh api .../pulls/<N>/comments`) を併用しないと取りこぼすため,
-# このスクリプトで両者を 1 コマンドにまとめている.
+# gh pr view --json reviews にはインライン review comment が含まれない。
+# 別 API (`gh api .../pulls/<N>/comments`) を併用しないと取りこぼすため、
+# このスクリプトで両者を 1 コマンドにまとめている。
 #
 # 出力フィールド:
-#   state, isDraft, reviewDecision, mergeable, mergeStateStatus
+#   state、isDraft、reviewDecision、mergeable、mergeStateStatus
 #   checks           : statusCheckRollup の配列
-#   reviews          : 全体レビュー (id, state, body, submittedAt, author)
-#   inline_comments  : インライン comment (id, in_reply_to_id, path, line,
-#                       original_line, original_commit_id, body, user)
+#   reviews          : 全体レビュー (id、state、body、submittedAt、author)
+#   inline_comments  : インライン comment (id、in_reply_to_id、path、line、
+#                       original_line、original_commit_id、body、user)
 
 set -euo pipefail
 

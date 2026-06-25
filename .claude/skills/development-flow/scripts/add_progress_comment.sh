@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Usage: add_progress_comment.sh <issue_number> <body_file>
 #
-# Issue に進捗コメントを追加投稿する.
-# 本文ファイルの末尾に署名 `*This comment was posted by AI Agent.*` を自動付加する.
-# 本文はファイル経由で渡すため, バッククォートやコードブロックを含めても
-# シェルのエスケープ事故が起きない.
+# Issue に進捗コメントを追加投稿する。
+# 本文ファイルの末尾に署名 `*This comment was posted by AI Agent.*` を自動付加する。
+# 本文はファイル経由で渡すため、バッククォートやコードブロックを含めても
+# シェルのエスケープ事故が起きない。
 
 set -euo pipefail
 

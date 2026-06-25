@@ -8,7 +8,7 @@
   ```
 
   ```md
-  Closes #123, #456（複数の場合）
+  Closes #123、#456（複数の場合）
   ```
 
 対応する Issue が存在しない場合（緊急の修正等）は、その旨と対応の背景を簡潔に記載すること。原則として、PR には対応する Issue が存在することが望ましい。
@@ -158,13 +158,13 @@
   ~~~
   $ pytest tests/ -x --group=1 -v
   ========================= test session starts ==========================
-  platform linux -- Python 3.12.0, pytest-8.1.1
+  platform linux -- Python 3.12.0、pytest-8.1.1
   collected 200 items
 
   tests/unit/test_order.py::test_create_order PASSED
   tests/unit/test_order.py::test_cancel_order PASSED
   tests/unit/test_order.py::test_update_order PASSED
-  ...
+  ..。
   ========================= 200 passed in 42.31s =========================
   ~~~
 

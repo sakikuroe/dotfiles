@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Usage: post_implementation_plan.sh <issue_number> <body_file>
 #
-# 実装方針コメントを Issue に投稿する.
-# 本文ファイルの末尾に署名 `*This comment was posted by AI Agent.*` を自動付加する.
-# 本文はファイル経由で渡すため, バッククォートやコードブロックを含めても
-# シェルのエスケープ事故が起きない.
+# 実装方針コメントを Issue に投稿する。
+# 本文ファイルの末尾に署名 `*This comment was posted by AI Agent.*` を自動付加する。
+# 本文はファイル経由で渡すため、バッククォートやコードブロックを含めても
+# シェルのエスケープ事故が起きない。
 #
-# 投稿された Issue コメントの URL を標準出力に表示する.
+# 投稿された Issue コメントの URL を標準出力に表示する。
 
 set -euo pipefail
 

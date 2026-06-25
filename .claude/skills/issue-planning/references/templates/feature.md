@@ -134,7 +134,7 @@
   - #456 flaky test の修正 — 本 Issue の作業に着手する前に、先にこちらの対応を完了させる必要がある
   - #123 テストスイートの実行時間計測 — 本 Issue の前提となる計測データ
   - docs/adr/007-ci-parallel-strategy.md — 並列化方針の設計判断を記録した ADR
-  - https://docs.github.com/en/actions/... — GitHub Actions の matrix strategy に関する公式ドキュメント
+  - https://docs.github.com/en/actions/..。— GitHub Actions の matrix strategy に関する公式ドキュメント
   - https://example.com/blog/ci-parallel-testing — 他社での CI 並列化事例。分割戦略の選定時に参考にした
   ```
 
