@@ -1,4 +1,0 @@
-interface:
-  display_name: "Development Flow"
-  short_description: "Guide an issue-driven GitHub workflow using main plus linked worktrees and user-approved remote actions"
-  default_prompt: "Use $development-flow to run an issue-driven GitHub development flow that keeps `main` as the only long-lived branch, uses linked worktrees under `~/.worktrees` for implementation, and requires user authorization before remote git or gh actions."
