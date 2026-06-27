@@ -77,7 +77,7 @@ development-flow が直接担う段階の手順.
 
 操作ミスが起きやすい手順はスクリプトに委譲する.
 
-- [scripts/create_worktree.sh](./scripts/create_worktree.sh): branch と worktree を命名規則通りに作成・再利用する.
-- [scripts/cleanup.sh](./scripts/cleanup.sh): マージ後の後処理を正しい順序で実行する (remote branch 削除 → worktree 削除 → local branch 削除 → default branch 同期).
-- [scripts/add_progress_comment.sh](./scripts/add_progress_comment.sh): Issue に進捗コメントを追加投稿する. 状態変化のたびに呼ぶ.
-- [scripts/_append_signature.sh](./scripts/_append_signature.sh): ファイルまたは標準入力の末尾に署名を追加する. 各スクリプトが内部で呼び出す.
+- [scripts/create_worktree.sh](./scripts/create_worktree.sh): `bash .claude/skills/development-flow/scripts/create_worktree.sh <branch-name>` で, 作業ブランチと worktree を命名規則通りに作成・再利用する.
+- [scripts/cleanup.sh](./scripts/cleanup.sh): `bash .claude/skills/development-flow/scripts/cleanup.sh <PR番号> [--yes]` で, マージ後の後処理 (remote branch 削除 → worktree 削除 → local branch 削除 → default branch 同期) を順に実行する.
+- [scripts/add_progress_comment.sh](./scripts/add_progress_comment.sh): `bash .claude/skills/development-flow/scripts/add_progress_comment.sh <issue番号> <body_file>` で, Issue に進捗コメントを投稿する. 状態変化のたびに呼ぶ.
+- [scripts/_append_signature.sh](./scripts/_append_signature.sh): 他のスクリプトが内部で呼び出し, ファイルまたは標準入力の末尾に署名を追加する.
