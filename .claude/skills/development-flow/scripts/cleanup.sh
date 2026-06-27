@@ -5,7 +5,7 @@
 #   1. リモートブランチを削除する
 #   2. worktree を削除する
 #   3. ローカルブランチを削除する
-#   4. main を origin/main と同期する
+#   4. default branch を origin と同期する
 #
 # --yes: リモートブランチ削除の確認プロンプトをスキップする
 
@@ -81,12 +81,12 @@ else
 fi
 
 # 3. ローカルブランチを削除する.
-# 現在そのブランチにいる場合は先に main へ移動が必要なため中断する.
+# 現在そのブランチにいる場合は先に default branch へ移動が必要なため中断する.
 echo ""
 echo "=== 3/4 local branch ==="
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [[ "$CURRENT_BRANCH" == "$BRANCH" ]]; then
-    echo "Error: currently on $BRANCH. Switch to main first." >&2
+    echo "Error: currently on $BRANCH. Switch to the default branch first." >&2
     exit 1
 fi
 if git branch --list "$BRANCH" | grep -q .; then
@@ -98,9 +98,9 @@ else
     echo "already deleted"
 fi
 
-# 4. main を origin/main と同期する.
+# 4. default branch を origin と同期する.
 echo ""
-echo "=== 4/4 sync main ==="
+echo "=== 4/4 sync default branch ==="
 git fetch origin --prune
 git pull --ff-only
 echo "done"

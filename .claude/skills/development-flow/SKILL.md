@@ -6,20 +6,20 @@ description: GitHub Issue を起点とする AI 主導の開発フロー. 開発
 ## 概要
 
 GitHub Issue を要求の起点とし, AI Agent が実装, 検証, git/gh 操作を担う開発フロー.
-元の clone を制御用 worktree (`main` 固定) とし, 実装は `~/.worktrees/` 配下の作業用 worktree で行う.
+元の clone を制御用 worktree (default branch 固定) とし, 実装は `~/.worktrees/` 配下の作業用 worktree で行う.
 対象範囲は 1 Issue の着手準備から merge 完了まで.
 
-本スキルは全体の順序を統括し, ワークスペースの準備 (`main` 同期, 作業ブランチ・worktree の作成) と マージ・後処理を直接担う. 途中の各段階 (Issue 起票, 実装, PR 作成, レビュー対応) は対応するスキルを参照すること.
+本スキルは全体の順序を統括し, ワークスペースの準備 (default branch 同期, 作業ブランチ・worktree の作成) と マージ・後処理を直接担う. 途中の各段階 (Issue 起票, 実装, PR 作成, レビュー対応) は対応するスキルを参照すること.
 
 ## 手順
 
 先頭から順に進める. 各スキルは単独でも利用できるが, 1 Issue を着手から merge まで通す場合はこの順序に従う.
 
-1. `main` を同期する — [references/sync_main.md](./references/sync_main.md).
+1. default branch を同期する — [references/sync_main.md](./references/sync_main.md).
 2. Issue を起票し, 実装方針の承認を得る — [issue-planning](../issue-planning/SKILL.md).
 3. 作業ブランチと worktree を作成する — [references/create_branch.md](./references/create_branch.md).
 4. 作業用 worktree で実装, 検証, コミットを行う — [implementation](../implementation/SKILL.md).
-5. push して `main` 向け PR を作成する — [pr-creation](../pr-creation/SKILL.md).
+5. push して default branch 向け PR を作成する — [pr-creation](../pr-creation/SKILL.md).
 6. PR の状態を判定し, レビュー指摘や CI 不具合に対応する — [review-response](../review-response/SKILL.md).
 7. マージを依頼し, 後処理を行う — [references/merge_and_cleanup.md](./references/merge_and_cleanup.md).
 
@@ -27,8 +27,8 @@ GitHub Issue を要求の起点とし, AI Agent が実装, 検証, git/gh 操作
 
 ## 前提
 
-- default branch が `main` の GitHub リポジトリーであること.
-- `main` への直接 push は行わず, 作業ブランチと PR を経由すること.
+- default branch を持つ GitHub リポジトリーであること (既定では `main`).
+- default branch への直接 push は行わず, 作業ブランチと PR を経由すること.
 - 初回着手時は `gh auth status` とリポジトリーの保護ルール (必須承認数, status checks, merge queue の有無) を確認すること.
 - 単独開発で他者承認が必須の保護ルールがある場合は, 別アカウントかルール調整が先に必要.
 
@@ -104,15 +104,15 @@ AI Agent が作業中の状態は「〜中」, 外部の応答を待つ状態は
 
 development-flow が直接担う段階の手順.
 
-- [references/sync_main.md](./references/sync_main.md): `main` を `origin/main` に同期し, worktree 配置規則を定める.
+- [references/sync_main.md](./references/sync_main.md): default branch を origin と同期し, worktree 配置規則を定める.
 - [references/create_branch.md](./references/create_branch.md): 作業ブランチと worktree を作成する.
-- [references/merge_and_cleanup.md](./references/merge_and_cleanup.md): マージ依頼と後処理 (remote branch / worktree / local branch の削除と `main` 同期) を行う.
+- [references/merge_and_cleanup.md](./references/merge_and_cleanup.md): マージ依頼と後処理 (remote branch / worktree / local branch の削除と default branch 同期) を行う.
 
 ## スクリプト
 
 操作ミスが起きやすい手順はスクリプトに委譲する.
 
 - [scripts/create_worktree.sh](./scripts/create_worktree.sh): branch と worktree を命名規則通りに作成・再利用する.
-- [scripts/cleanup.sh](./scripts/cleanup.sh): マージ後の後処理を正しい順序で実行する (remote branch 削除 → worktree 削除 → local branch 削除 → main 同期).
+- [scripts/cleanup.sh](./scripts/cleanup.sh): マージ後の後処理を正しい順序で実行する (remote branch 削除 → worktree 削除 → local branch 削除 → default branch 同期).
 - [scripts/add_progress_comment.sh](./scripts/add_progress_comment.sh): Issue に進捗コメントを追加投稿する. 状態変化のたびに呼ぶ.
 - [scripts/_append_signature.sh](./scripts/_append_signature.sh): ファイルまたは標準入力の末尾に署名を追加する. 各スクリプトが内部で呼び出す.

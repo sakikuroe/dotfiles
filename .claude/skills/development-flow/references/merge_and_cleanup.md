@@ -1,15 +1,15 @@
-# `main` へのマージと後処理
+# default branch へのマージと後処理
 
 ## 概要
 
 マージ可能条件を確認し, ユーザーへ最終マージを依頼する.
-マージ前に `origin/main` への追従を行い, マージ後は Issue, worktree, branch の後処理を行って次の作業に入れる状態に戻す.
+マージ前に origin の default branch への追従を行い, マージ後は Issue, worktree, branch の後処理を行って次の作業に入れる状態に戻す.
 PR がすでに merge 済みの場合は後処理だけを実行する.
 
 ## 手順
 
 - 制御用 worktree で実行していることを確認する.
-    - `main` branch にいること, 無関係な未コミット差分がないこと.
+    - default branch にいること, 無関係な未コミット差分がないこと.
 - Issue のコメント履歴から branch 名と PR を確認する.
     - branch 名と PR が見つからない場合は中断すること.
     - worktree path は sync_main の配置規則に従う.
@@ -17,9 +17,9 @@ PR がすでに merge 済みの場合は後処理だけを実行する.
     - `MERGED` の場合 → 後処理へ進む.
     - `CLOSED` かつ未 merge の場合 → 中断し, 継続 / abandon をユーザーに確認すること.
     - `OPEN` の場合 → 以降の手順へ進む.
-- 作業用 worktree で `origin/main` に追従する.
+- 作業用 worktree で origin の default branch に追従する.
     - worktree が存在しない場合は create_branch に戻ること.
-    - `origin/main` に rebase する.
+    - origin の default branch に rebase する.
     - rebase で HEAD が変わった場合は `push --force-with-lease` し, review-response スキルに戻って checks / review を再確認すること.
 - マージ可否を判定する.
     - Issue の `完了条件` がすべて達成済みであること.
@@ -38,13 +38,13 @@ PR がすでに merge 済みの場合は後処理だけを実行する.
     - PR が `MERGED` であることを確認する.
     - Issue のクローズ状態を確認する (`Closes` による自動クローズ, または手動).
     - 進捗コメントで状態を `完了` に記録する. `bash .claude/skills/development-flow/scripts/add_progress_comment.sh <issue番号> <body_file>` を使う.
-    - `bash .claude/skills/development-flow/scripts/cleanup.sh <PR番号> [--yes]` で remote branch 削除 → worktree 削除 → local branch 削除 → main 同期を一括して行う.
+    - `bash .claude/skills/development-flow/scripts/cleanup.sh <PR番号> [--yes]` で remote branch 削除 → worktree 削除 → local branch 削除 → default branch 同期を一括して行う.
         - 実行場所: メインリポジトリー. 削除対象の worktree 内から実行すると, 削除後にカレントディレクトリが消えてシェルが追従できなくなるため.
         - `--yes` を付けると remote branch 削除の確認プロンプトをスキップする. 非対話環境 (Claude Code など) ではこれを付けること.
         - コマンド例:
             ```bash
             # 実行場所: メインリポジトリー
-            cd /path/to/main/repo
+            cd /path/to/repo
             bash .claude/skills/development-flow/scripts/cleanup.sh 123 --yes
             ```
 - 最終結果をユーザーへ要約する.
@@ -56,11 +56,11 @@ PR がすでに merge 済みの場合は後処理だけを実行する.
 1. remote branch の削除.
 2. worktree の削除.
 3. local branch の削除.
-4. `main` の同期.
+4. default branch の同期.
 
 ### local branch 削除の注意
 
-`Squash and merge` や `Rebase and merge` を使うと, local の作業 branch が `main` の祖先にならず `git branch -d` が失敗することがある.
+`Squash and merge` や `Rebase and merge` を使うと, local の作業 branch が default branch の祖先にならず `git branch -d` が失敗することがある.
 PR が `MERGED` で変更が取り込まれていれば問題ないので, 必要なら `git branch -D` を使うこと.
 
 ### マージ依頼テンプレート
@@ -100,7 +100,7 @@ GitHub Web で `Add to merge queue` または `Merge when ready` をお願いし
 
 ## この段階の完了条件
 
-- [ ] 対象変更が `main` に取り込まれている.
+- [ ] 対象変更が default branch に取り込まれている.
 - [ ] 進捗コメントで `完了` が記録されている.
 - [ ] 作業用 worktree と branch が削除されている.
-- [ ] 制御用 worktree の `main` が同期されている.
+- [ ] 制御用 worktree の default branch が同期されている.
