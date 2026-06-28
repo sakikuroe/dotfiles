@@ -1,4 +1,0 @@
-interface:
-  display_name: "Writing Rules"
-  short_description: "Apply repository writing rules for Japanese and Markdown"
-  default_prompt: "Use $writing-rules to apply repository writing rules for Japanese and Markdown."
