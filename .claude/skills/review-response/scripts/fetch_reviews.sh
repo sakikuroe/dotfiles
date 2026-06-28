@@ -29,8 +29,8 @@ REPO=$(gh repo view --json nameWithOwner --jq '.nameWithOwner')
 PR_INFO=$(gh pr view "$PR_NUMBER" \
     --json state,isDraft,reviewDecision,mergeable,mergeStateStatus,statusCheckRollup,reviews)
 
-# インライン review comment 一覧
-INLINE=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}/comments")
+# インライン review comment 一覧 (全ページ取得)
+INLINE=$(gh api --paginate "repos/${REPO}/pulls/${PR_NUMBER}/comments" | jq -s 'add')
 
 # 両者を統合した JSON を出力
 # --argjson は Linux の MAX_ARG_STRLEN (128KB) を超えると失敗するため,
