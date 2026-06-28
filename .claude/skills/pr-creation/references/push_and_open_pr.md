@@ -39,10 +39,9 @@
 - PR の内容をユーザーへ提示し, 認証を得る.
     - PR タイトル, 本文, draft / ready の別を提示する.
 - ユーザーの認証後に PR を作成または更新する.
-    - 実行場所: メインリポジトリー. `gh pr create` はカレントブランチから PR を作るため, worktree から実行すると別 Bash セッションで cwd がリセットされて default branch から作ろうとしてエラーになる事故が起きやすい. メインリポジトリーから `--head <branch>` で明示するのが安全.
-    - PR 本文は `templates/pr.md` を参照して書くこと. ヒアドキュメントで一時ファイルに書き出してから `--body-file` で渡すこと.
-    - タイトルにバッククォートを含む場合, `--title "..."` とダブルクォートで渡すとシェルがコマンド置換として解釈し壊れる. 変数経由かシングルクォートで渡すこと.
-    - PR 作成は `bash .claude/skills/pr-creation/scripts/create_pr.sh <タイトル> <body_file> <head_branch>` を使うこと. 本文末尾に署名を自動付加する.
+    - 実行場所: メインリポジトリー. `gh pr create` はカレントブランチから PR を作るため, worktree から実行すると default branch から作ろうとしてエラーになる事故が起きやすい.
+    - PR 本文は `templates/pr.md` を参照して書くこと.
+    - PR 作成は `bash .claude/skills/pr-creation/scripts/create_pr.sh <タイトル> <body_file> <head_branch>` を使うこと.
     - コマンド例:
         ```bash
         # 実行場所: メインリポジトリー
@@ -65,9 +64,6 @@
 - ready PR の場合, レビュー依頼先をユーザーに確認する.
     - 「レビューを依頼するユーザーがいれば GitHub ユーザー名を教えてください」と尋ねる.
     - ユーザーが指定した場合は `bash .claude/skills/pr-creation/scripts/add_reviewer.sh <PR番号> <username>` で依頼する.
-        - 実行場所: メインリポジトリー (リポジトリー判定に `gh repo view` を使うため worktree 内でも可).
-        - `gh pr edit` が `projectCards` の GraphQL エラーで失敗する場合は REST API を使う.
-          例: `gh api repos/<owner>/<repo>/pulls/<number> --method PATCH --field title='...' --jq '.title'`
     - 不要と回答した場合はスキップする.
 - PR URL と状態を進捗コメントで記録する. `add_progress_comment.sh` で投稿すること.
     - ready PR → 状態は `レビュー待ち`, draft PR → `ドラフトレビュー中`.

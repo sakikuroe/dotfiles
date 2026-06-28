@@ -20,8 +20,6 @@ description: GitHub Issue の起票と実装計画の作成・提示を担うス
 
 ## スクリプト
 
-操作ミスが起きやすい手順はスクリプトに委譲する.
-
 - [create_issue.sh](./scripts/create_issue.sh): `bash .claude/skills/issue-planning/scripts/create_issue.sh <タイトル> <body_file>` で Issue を作成する.
 - [post_implementation_plan.sh](./scripts/post_implementation_plan.sh): `bash .claude/skills/issue-planning/scripts/post_implementation_plan.sh <issue番号> <body_file>` で実装方針コメントを Issue に投稿する.
 - [update_issue_body.sh](./scripts/update_issue_body.sh): `bash .claude/skills/issue-planning/scripts/update_issue_body.sh <issue番号> <body_file>` で Issue 本文をファイル内容に置き換える. 完了条件や背景・動機など description 内の節の書き換えに使う.

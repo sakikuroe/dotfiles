@@ -40,13 +40,6 @@ Issue 本文は変更せず, 方針はコメントとして追記する.
         ```
 - 進捗コメントで状態を `方針レビュー待ち` に記録する.
     - `bash .claude/skills/issue-planning/scripts/add_progress_comment.sh <issue番号> <body_file>` で投稿する.
-    - コマンド例:
-        ```bash
-        cat <<'EOF' > /tmp/progress.md
-        状態: 方針レビュー待ち
-        EOF
-        bash .claude/skills/issue-planning/scripts/add_progress_comment.sh <issue番号> /tmp/progress.md
-        ```
 - ユーザーの承認または修正依頼を待つ.
     - 承認が得られたら作業ブランチと worktree の作成へ進む.
     - 修正依頼があった場合は方針を見直し, コメントを投稿し直す.
