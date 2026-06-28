@@ -25,8 +25,7 @@
     - 採用の場合 → 作業用 worktree で修正し, 検証する.
         - 実行場所: 作業用 worktree (`~/.worktrees/<repo>-<branch>`).
     - コミットし, push する.
-        - `git-commit` スキルの `commit_with_signature.sh` でコミットする. この指摘への修正だけを 1 コミットにまとめ, そのコミットハッシュを後段のインライン返答で使う.
-            - コマンド例: `bash .claude/skills/git-commit/scripts/commit_with_signature.sh "<メッセージ>"`.
+        - コミットは `git-committer` サブエージェントに委譲する. この指摘への修正だけを 1 コミットにまとめるよう伝え, 返ってきたコミットハッシュを後段のインライン返答で使う.
         - push はこのスキルが行う. 通常 → `git push`, 履歴書き換え → `git push --force-with-lease`.
         - 次の指摘へ進む前に必ず push まで完了させること.
     - 該当 review thread または PR コメントへ quote reply で返答する.
