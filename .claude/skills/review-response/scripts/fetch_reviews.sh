@@ -2,17 +2,17 @@
 # Usage: fetch_reviews.sh <pr_number>
 #
 # PR の状態 / 全体レビュー / インライン review comment を 1 回で取得し,
-# 統合した JSON を出力する.
+# 統合した JSON を出力する。
 #
-# gh pr view --json reviews にはインライン review comment が含まれない.
+# gh pr view --json reviews にはインライン review comment が含まれない。
 # 別 API (`gh api .../pulls/<N>/comments`) を併用しないと取りこぼすため,
-# このスクリプトで両者を 1 コマンドにまとめている.
+# このスクリプトで両者を 1 コマンドにまとめている。
 #
 # 出力フィールド:
 #   state, isDraft, reviewDecision, mergeable, mergeStateStatus
 #   checks           : statusCheckRollup の配列
-#   reviews          : 全体レビュー (id, state, body, submittedAt, author)
-#   inline_comments  : インライン comment (id, in_reply_to_id, path, line,
+#   reviews          : 全体レビュー (id、state、body、submittedAt、author)
+#   inline_comments  : インライン comment (id、in_reply_to_id、path、line,
 #                       original_line, original_commit_id, body, user)
 
 set -euo pipefail
@@ -34,7 +34,7 @@ INLINE=$(gh api --paginate "repos/${REPO}/pulls/${PR_NUMBER}/comments" | jq -s '
 
 # 両者を統合した JSON を出力
 # --argjson は Linux の MAX_ARG_STRLEN (128KB) を超えると失敗するため,
-# 一時ファイル経由で渡す.
+# 一時ファイル経由で渡す。
 _TMP_PR=$(mktemp)
 _TMP_INLINE=$(mktemp)
 trap 'rm -f "$_TMP_PR" "$_TMP_INLINE"' EXIT
