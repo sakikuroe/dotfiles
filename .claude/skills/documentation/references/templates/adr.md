@@ -33,6 +33,7 @@ ADR の運用ルール:
 
   - Proposed（YYYY-MM-DD） — レビュー中。まだ決定は確定していない。
   - Accepted（YYYY-MM-DD） — 決定が確定し、有効である。
+  - Deprecated（YYYY-MM-DD） — 非推奨になった。後継はないがもう推奨しない。
   - Superseded by ADR-XXXX（YYYY-MM-DD） — 別の ADR によって置き換えられた。
 
 例: Accepted（2026-06-28）
