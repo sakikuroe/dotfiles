@@ -33,18 +33,26 @@ PR_INFO=$(gh pr view "$PR_NUMBER" \
 INLINE=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}/comments")
 
 # 両者を統合した JSON を出力
-jq -n --argjson pr "$PR_INFO" --argjson inline "$INLINE" '{
-    state: $pr.state,
-    isDraft: $pr.isDraft,
-    reviewDecision: $pr.reviewDecision,
-    mergeable: $pr.mergeable,
-    mergeStateStatus: $pr.mergeStateStatus,
-    checks: $pr.statusCheckRollup,
-    reviews: ($pr.reviews | map({
+# --argjson は Linux の MAX_ARG_STRLEN (128KB) を超えると失敗するため,
+# 一時ファイル経由で渡す.
+_TMP_PR=$(mktemp)
+_TMP_INLINE=$(mktemp)
+trap 'rm -f "$_TMP_PR" "$_TMP_INLINE"' EXIT
+printf '%s' "$PR_INFO" > "$_TMP_PR"
+printf '%s' "$INLINE" > "$_TMP_INLINE"
+
+jq -n --slurpfile pr "$_TMP_PR" --slurpfile inline "$_TMP_INLINE" '{
+    state: $pr[0].state,
+    isDraft: $pr[0].isDraft,
+    reviewDecision: $pr[0].reviewDecision,
+    mergeable: $pr[0].mergeable,
+    mergeStateStatus: $pr[0].mergeStateStatus,
+    checks: $pr[0].statusCheckRollup,
+    reviews: ($pr[0].reviews | map({
         id, state, body, submittedAt,
         author: .author.login
     })),
-    inline_comments: ($inline | map({
+    inline_comments: ($inline[0] | map({
         id, in_reply_to_id, path, line,
         original_line, original_start_line, original_commit_id, body,
         user: .user.login
