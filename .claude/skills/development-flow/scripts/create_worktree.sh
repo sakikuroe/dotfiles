@@ -12,7 +12,7 @@ if [[ $# -lt 1 ]]; then
 fi
 
 BRANCH="$1"
-# worktree 内から実行された場合でも正しいリポジトリ名を得るため,
+# worktree 内から実行された場合でも正しいリポジトリ名を得るため、
 # --show-toplevel ではなく worktree list の先頭行 (メイン worktree) を使う。
 REPO_NAME=$(basename "$(git worktree list --porcelain | awk 'NR==1{print $2}')")
 BRANCH_SAFE="${BRANCH//\//-}"

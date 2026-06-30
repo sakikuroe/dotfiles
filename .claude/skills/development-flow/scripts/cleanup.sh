@@ -31,7 +31,7 @@ fi
 # PR のブランチ名を取得し、worktree パスを算出する。
 # スラッシュをハイフンに置換して、ファイルシステムで安全なパスを生成する。
 BRANCH=$(gh pr view "$PR_NUMBER" --json headRefName --jq '.headRefName')
-# worktree 内から実行された場合でも正しいリポジトリ名を得るため,
+# worktree 内から実行された場合でも正しいリポジトリ名を得るため、
 # --show-toplevel ではなく worktree list の先頭行 (メイン worktree) を使う。
 MAIN_REPO=$(git worktree list --porcelain | awk 'NR==1{print $2}')
 REPO_NAME=$(basename "$MAIN_REPO")

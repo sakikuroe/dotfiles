@@ -4,17 +4,17 @@
 #   1 行目: [HH:MM:SS] <pwd(~置換)> <git-branch(あれば)>
 #   2 行目: >>> (入力インジケーター)
 
-# `~/.bashrc` の `export PATH="$HOME/.npm-global/bin:$PATH"` を `nu` でも再現します.
-# `codex` は npm global に入るため, 先頭へ配置して優先的に解決します.
+# `~/.bashrc` の `export PATH="$HOME/.npm-global/bin:$PATH"` を `nu` でも再現する。
+# `codex` は npm global に入るため、先頭へ配置して優先的に解決する。
 let npm_global_bin = ($nu.home-dir | path join ".npm-global" "bin" | path expand)
 $env.PATH = ($env.PATH | where {|it| ($it | path expand) != $npm_global_bin } | prepend $npm_global_bin)
 
-# `~/.bashrc` の `# opencode` ブロック (`export PATH="$HOME/.opencode/bin:$PATH"`) を `nu` でも再現します.
-# `npm_global_bin` より後に prepend し, `opencode` を優先的に解決します.
+# `~/.bashrc` の `# opencode` ブロック (`export PATH="$HOME/.opencode/bin:$PATH"`) を `nu` でも再現する。
+# `npm_global_bin` より後に prepend し、`opencode` を優先的に解決する。
 let opencode_bin = ($nu.home-dir | path join ".opencode" "bin" | path expand)
 $env.PATH = ($env.PATH | where {|it| ($it | path expand) != $opencode_bin } | prepend $opencode_bin)
 
-# PWD をホーム配下の場合は "~" に置換して返します.
+# PWD をホーム配下の場合は "~" に置換して返す。
 def pretty_pwd [] {
   let home = $nu.home-dir
   let pwd  = $env.PWD
@@ -58,7 +58,7 @@ def pretty_pwd [] {
   }
 }
 
-# WezTerm のワークスペース名を返します (WezTerm 外または取得失敗時は空文字です).
+# WezTerm のワークスペース名を返す (WezTerm 外または取得失敗時は空文字)。
 def wezterm_workspace [] {
   let pane_id = if "WEZTERM_PANE" in $env { $env.WEZTERM_PANE } else { "" }
   if ($pane_id | is-empty) {
@@ -75,7 +75,7 @@ def wezterm_workspace [] {
   }
 }
 
-# Git 情報を 1 ブロックで返します (repo 外では空文字です).
+# Git 情報を 1 ブロックで返す (repo 外では空文字)。
 def git_block [] {
   let r = (^git status --porcelain=2 --branch | complete)
   if $r.exit_code != 0 {
@@ -128,7 +128,7 @@ def git_block [] {
   }
 }
 
-# プロンプトを生成します (3 行構成: 日時+ワークスペース / ユーザー@ホスト:パス+git / 入力行).
+# プロンプトを生成する (3 行構成: 日時+ワークスペース / ユーザー@ホスト:パス+git / 入力行)。
 def left_prompt [] {
   let t = (date now | format date "%Y-%m-%d %H:%M:%S%:z")
   let user = (^whoami | str trim)
@@ -143,14 +143,14 @@ def left_prompt [] {
   $"[(ansi cyan)($t)(ansi reset)]($ws_part)\n(ansi blue)($user)@($host):($p)(ansi reset)($g_part)\n"
 }
 
-# プロンプト本体です (毎回評価されます).
+# プロンプト本体 (毎回評価される)。
 $env.PROMPT_COMMAND = {|| left_prompt }
 
-# 右側プロンプトは表示しません.
+# 右側プロンプトは表示しない。
 $env.PROMPT_COMMAND_RIGHT = {|| "" }
 
-# 入力インジケーターです (2 行目です).
+# 入力インジケーター (2 行目)
 $env.PROMPT_INDICATOR = {|| ">>> " }
 
-# 複数行入力時のインジケーターです.
+# 複数行入力時のインジケーター
 $env.PROMPT_MULTILINE_INDICATOR = {|| "... " }

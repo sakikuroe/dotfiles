@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Usage: fetch_reviews.sh <pr_number>
 #
-# PR の状態 / 全体レビュー / インライン review comment を 1 回で取得し,
+# PR の状態 / 全体レビュー / インライン review comment を 1 回で取得し、
 # 統合した JSON を出力する。
 #
 # gh pr view --json reviews にはインライン review comment が含まれない。
-# 別 API (`gh api .../pulls/<N>/comments`) を併用しないと取りこぼすため,
+# 別 API (`gh api .../pulls/<N>/comments`) を併用しないと取りこぼすため、
 # このスクリプトで両者を 1 コマンドにまとめている。
 #
 # 出力フィールド:
@@ -33,7 +33,7 @@ PR_INFO=$(gh pr view "$PR_NUMBER" \
 INLINE=$(gh api --paginate "repos/${REPO}/pulls/${PR_NUMBER}/comments" | jq -s 'add')
 
 # 両者を統合した JSON を出力
-# --argjson は Linux の MAX_ARG_STRLEN (128KB) を超えると失敗するため,
+# --argjson は Linux の MAX_ARG_STRLEN (128KB) を超えると失敗するため、
 # 一時ファイル経由で渡す。
 _TMP_PR=$(mktemp)
 _TMP_INLINE=$(mktemp)

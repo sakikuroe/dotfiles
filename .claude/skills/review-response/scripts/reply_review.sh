@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Usage: reply_review.sh <pr_number> <review_node_id> <body_file>
 #
-# 指定したレビューの本文を引用ブロックとして付けたうえで,
+# 指定したレビューの本文を引用ブロックとして付けたうえで、
 # <body_file> の内容を返答コメントとして投稿する。
 # 返答本文の末尾に署名 `*This comment was posted by AI Agent.*` を自動付加する。
 #
