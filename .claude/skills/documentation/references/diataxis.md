@@ -39,7 +39,7 @@ docs は、読者の必要に応じて性質の異なる 4 種類に分かれる
 
 ```
 docs/
-├── adr/            # 将来を縛る設計判断 (ADR。adr.md を参照)
+├── adr/            # 将来を縛る設計判断 (ADR、adr.md を参照)
 ├── tutorial/       # 学習導線
 ├── how-to/         # 目的達成の手順
 ├── reference/      # 現在の仕様・API・設定

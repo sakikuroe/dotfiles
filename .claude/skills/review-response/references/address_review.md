@@ -23,7 +23,7 @@
     - 方針をユーザーへ提示し、採否を確定する。
         - 採用 / 非採用 / 別 Issue へ送る / 要件変更として issue-planning スキルに戻す。
     - 採用の場合 → 作業用 worktree で修正し、検証する。
-        - 実行場所: 作業用 worktree (`~/.worktrees/<repo>-<branch>`)。
+        - 実行場所は作業用 worktree (`~/.worktrees/<repo>-<branch>`) とすること。
     - コミットし、push する。
         - コミットは `git-committer` サブエージェントに委譲する。この指摘への修正だけを 1 コミットにまとめるよう伝え、返ってきたコミットハッシュを後段のインライン返答で使う。
         - push はこのスキルが行う。通常 → `git push`、履歴書き換え → `git push --force-with-lease`。
@@ -39,9 +39,9 @@
     - ready PR の場合 → ユーザー認証後に再レビュー依頼する。
     - draft から ready に切り替える場合 → ユーザー認証後に `bash .claude/skills/review-response/scripts/set_ready.sh <PR番号>` を実行し、`Refs` を `Closes` に更新する。
 - 進捗コメントで状態を記録する。
-    - ready PR の再レビュー待ち → `再レビュー待ち`。
-    - draft のまま継続 → `ドラフトレビュー中`。
-    - draft → ready に切り替え → `レビュー待ち`。
+    - ready PR の再レビュー待ち → `再レビュー待ち`
+    - draft のまま継続 → `ドラフトレビュー中`
+    - draft → ready に切り替え → `レビュー待ち`
     - `bash .claude/skills/review-response/scripts/add_progress_comment.sh <issue番号> <body_file>` で投稿する。
 - wait_user_review に戻り、再レビューを待つ。
 
@@ -55,7 +55,7 @@
 
 ## 原則
 
-- ユーザー認証が必要な操作: draft → ready の切り替え、レビュー依頼の追加・再設定。
+- ユーザー認証が必要な操作: draft → ready の切り替え、レビュー依頼の追加・再設定
 - レビューへの返答は `writing-rules` スキルの `prose_structure.md` に従うこと。
 - resolve はレビュアーが行い、AI Agent は行わないこと。
 - 合意した内容だけを反映し、Issue のスコープを勝手に広げないこと。

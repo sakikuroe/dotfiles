@@ -23,7 +23,7 @@ PR がすでに merge 済みの場合は後処理だけを実行する。
     - rebase で HEAD が変わった場合は `push --force-with-lease` し、review-response スキルに戻って checks / review を再確認すること。
 - マージ可否を判定する。
     - Issue の `完了条件` がすべて達成済みであること。
-    - PR が open、draft でない、レビュー承認済み、checks 通過、競合なし。
+    - PR が open、draft でない、レビュー承認済み、checks 通過、競合なし
     - 条件を満たさない場合は review-response スキルに戻ること。
 - マージ方法を決める。
     - merge queue を使わない場合:
@@ -39,7 +39,7 @@ PR がすでに merge 済みの場合は後処理だけを実行する。
     - Issue のクローズ状態を確認する (`Closes` による自動クローズ、または手動)。
     - 進捗コメントで状態を `完了` に記録する。
     - `bash .claude/skills/development-flow/scripts/cleanup.sh <PR番号> [--yes]` で remote branch 削除 → worktree 削除 → local branch 削除 → default branch 同期を一括して行う。
-        - 実行場所: メインリポジトリー。削除対象の worktree 内から実行すると、削除後にカレントディレクトリが消えてシェルが追従できなくなるため。
+        - 実行場所はメインリポジトリーとすること。削除対象の worktree 内から実行すると、削除後にカレントディレクトリが消えてシェルが追従できなくなる。
         - `--yes` を付けると remote branch 削除の確認プロンプトをスキップする。非対話環境 (Claude Code など) ではこれを付けること。
         - コマンド例:
             ```bash
@@ -53,10 +53,10 @@ PR がすでに merge 済みの場合は後処理だけを実行する。
 
 後処理は以下の順で行うこと。worktree を先に削除しないと local branch の削除が失敗する。
 
-1. remote branch の削除。
-2. worktree の削除。
-3. local branch の削除。
-4. default branch の同期。
+1. remote branch の削除
+2. worktree の削除
+3. local branch の削除
+4. default branch の同期
 
 ### local branch 削除の注意
 

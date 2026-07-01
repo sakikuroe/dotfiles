@@ -39,7 +39,7 @@
 - PR の内容をユーザーへ提示し、認証を得る。
     - PR タイトル、本文、draft / ready の別を提示する。
 - ユーザーの認証後に PR を作成または更新する。
-    - 実行場所: メインリポジトリー。`gh pr create` はカレントブランチから PR を作るため、worktree から実行すると default branch から作ろうとしてエラーになる事故が起きやすい。
+    - 実行場所はメインリポジトリーとすること。`gh pr create` はカレントブランチから PR を作るため、worktree から実行すると default branch から作ろうとしてエラーになる事故が起きやすい。
     - PR 本文は `templates/pr.md` を参照して書くこと。
     - PR 作成は `bash .claude/skills/pr-creation/scripts/create_pr.sh <タイトル> <body_file> <head_branch>` を使うこと。
     - コマンド例:

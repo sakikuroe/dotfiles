@@ -123,7 +123,7 @@ config.window_padding = { left = 8, right = 0, top = 0, bottom = 1 }
 config.colors = config.colors or {}
 config.colors.split = '#ffffff'
 -- 非アクティブなペインの見た目を調整し、アクティブなペインを判別しやすくする。
--- `inactive_pane_hsb` は、非アクティブなペインにだけ適用される色補正 (HSB)。
+-- `inactive_pane_hsb` は、非アクティブなペインにだけ適用される色補正 (HSB) である。
 -- `saturation` は色の鮮やかさの倍率で、1.0 は変化なし、0.0 に近いほど灰色に寄る。
 -- `brightness` は明るさの倍率で、1.0 は変化なし、0.0 に近いほど暗くなる。
 config.inactive_pane_hsb = { saturation = 0.5, brightness = 0.80 }

@@ -1,6 +1,6 @@
 ---
 name: issue-planning
-description: GitHub Issue の起票と実装計画の作成・提示を担うスキル。ユーザーの要求から Issue を作成するとき、実装方針をコメントで投稿しユーザーの承認を得るときに使用する。単独で Issue 起票や計画作成を行う場面でも使用する。
+description: GitHub Issue の起票と実装計画の作成・提示を担うスキルである。ユーザーの要求から Issue を作成するとき、実装方針をコメントで投稿しユーザーの承認を得るときに使用する。単独で Issue 起票や計画作成を行う場面でも使用する。
 ---
 
 ## 概要
@@ -9,14 +9,14 @@ description: GitHub Issue の起票と実装計画の作成・提示を担うス
 
 ## 参照文書
 
-- [create_issue.md](./references/create_issue.md): ユーザーの要求から Issue を作成する手順。
-- [review_implementation_plan.md](./references/review_implementation_plan.md): 実装方針をコメントで投稿し、ユーザーの承認を得る手順。
+- [create_issue.md](./references/create_issue.md): ユーザーの要求から Issue を作成する手順
+- [review_implementation_plan.md](./references/review_implementation_plan.md): 実装方針をコメントで投稿し、ユーザーの承認を得る手順
 
 ## テンプレート
 
-- [bug.md](./references/templates/bug.md): バグ修正 Issue の本文テンプレート。
-- [feature.md](./references/templates/feature.md): 機能追加・機能改善 Issue の本文テンプレート。
-- [implementation_plan.md](./references/templates/implementation_plan.md): 実装方針コメントのテンプレート。
+- [bug.md](./references/templates/bug.md): バグ修正 Issue の本文テンプレート
+- [feature.md](./references/templates/feature.md): 機能追加・機能改善 Issue の本文テンプレート
+- [implementation_plan.md](./references/templates/implementation_plan.md): 実装方針コメントのテンプレート
 
 ## スクリプト
 
