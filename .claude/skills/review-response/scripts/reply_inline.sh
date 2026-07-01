@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # Usage: reply_inline.sh <pr_number> <comment_id> <body_file> <commit_hash|->
 #
-# PR のインライン review comment に返答を投稿する.
-# 本文ファイルの末尾に署名 `*This comment was posted by AI Agent.*` を自動付加する.
-# commit_hash にハッシュ値を渡すと, 該当コミットの URL を署名直前に挿入する.
-# 採用時は, 該当指摘への対応を含むコミットを明示的に指定すること.
-# 非採用などコミット URL が不要な場合は `-` を渡すことで挿入をスキップする.
-# 署名が見つからない場合は本文末尾に追加する.
+# PR のインライン review comment に返答を投稿する。
+# 本文ファイルの末尾に署名 `*This comment was posted by AI Agent.*` を自動付加する。
+# commit_hash にハッシュ値を渡すと、該当コミットの URL を署名直前に挿入する。
+# 採用時は、該当指摘への対応を含むコミットを明示的に指定すること。
+# 非採用などコミット URL が不要な場合は `-` を渡すことで挿入をスキップする。
+# 署名が見つからない場合は本文末尾に追加する。
 #
-# 本文はファイル経由で渡す (--body-file 相当). ヒアドキュメントでの
-# バッククォートエスケープ事故を避けるための設計.
+# 本文はファイル経由で渡す (--body-file 相当)。ヒアドキュメントでの
+# バッククォートエスケープ事故を避けるための設計。
 
 set -euo pipefail
 
@@ -37,7 +37,7 @@ SIG_FILE=$(mktemp)
 trap 'rm -f "$SIG_FILE" "$SEND_FILE"' EXIT
 bash "${SCRIPT_DIR}/_append_signature.sh" "$BODY_FILE" > "$SIG_FILE"
 
-# 2. commit URL を署名直前に挿入 (. "-" の場合はスキップ)
+# 2. commit URL を署名直前に挿入 (。"-" の場合はスキップ)
 SEND_FILE="$SIG_FILE"
 if [[ "$COMMIT_ARG" != "-" ]]; then
     if ! COMMIT_SHA=$(git rev-parse "$COMMIT_ARG" 2>/dev/null); then
@@ -65,8 +65,8 @@ if [[ "$COMMIT_ARG" != "-" ]]; then
     ' "$SIG_FILE" > "$SEND_FILE"
 fi
 
-# 返答コメントを投稿する.
-# gh api の -F フィールドは型推論を伴うため, jq で JSON 化して --input で渡す.
+# 返答コメントを投稿する。
+# gh api の -F フィールドは型推論を伴うため、jq で JSON 化して --input で渡す。
 jq -Rs '{body: .}' < "$SEND_FILE" \
     | gh api "repos/${REPO}/pulls/${PR_NUMBER}/comments/${COMMENT_ID}/replies" \
         --method POST --input - --jq '.html_url'

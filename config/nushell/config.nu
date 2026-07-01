@@ -1,36 +1,36 @@
 # ~/.config/nushell/config.nu
 #
-# もし "自動 ls" が Nushell の hooks.pre_prompt に入っている場合は, ここを確認します.
-# hooks.pre_prompt は "プロンプト表示直前" に実行されるため, ここに ls があると毎回 ls されます.
+# もし "自動 ls" が Nushell の hooks.pre_prompt に入っている場合は、ここを確認する。
+# hooks.pre_prompt は "プロンプト表示直前" に実行されるため、ここに ls があると毎回 ls される。
 #
-# 例: 次のような設定がある場合です.
+# 例: 次のような設定がある場合
 #   $env.config = ($env.config | upsert hooks.pre_prompt [ {|| ls } ])
 #
-# ログイン時の Welcome バナーを表示しないようにします.
+# ログイン時の Welcome バナーを表示しないようにする。
 $env.config = ($env.config | upsert show_banner false)
 
-# 補完メニューを `columnar` レイアウトへ明示的に切り替えます.
-# 既定の `completion_menu` を上書きし, 今後の見た目調整もしやすくします.
-# 既定の `completion_menu` と同名の設定を除外し, この後で差し込む定義だけを有効にします.
+# 補完メニューを `columnar` レイアウトへ明示的に切り替える。
+# 既定の `completion_menu` を上書きし、今後の見た目調整もしやすくする。
+# 既定の `completion_menu` と同名の設定を除外し、この後で差し込む定義だけを有効にする。
 let configured_menus = ($env.config.menus? | default [] | where {|menu| $menu.name != "completion_menu" })
 $env.config = ($env.config | upsert menus (
   $configured_menus ++ [{
-    # 既定の補完メニューと同名にすることで, `Tab` 補完の見た目だけを差し替えます.
+    # 既定の補完メニューと同名にすることで、`Tab` 補完の見た目だけを差し替える。
     name: completion_menu
-    # 入力中のバッファー差分だけに絞らず, 候補一覧全体を表示します.
+    # 入力中のバッファー差分だけに絞らず、候補一覧全体を表示する。
     only_buffer_difference: false
-    # 選択中の候補を示す先頭マーカーです.
+    # 選択中の候補を示す先頭マーカー
     marker: "| "
     type: {
-      # 候補を複数列で並べる `columnar` 表示を採用します.
+      # 候補を複数列で並べる `columnar` 表示を採用する。
       layout: columnar
-      # 一覧の列数と列幅を固定し, 候補数が増えても形が崩れにくいようにします.
+      # 一覧の列数と列幅を固定し、候補数が増えても形が崩れにくいようにする。
       columns: 4
       col_width: 20
       col_padding: 2
     }
     style: {
-      # 通常候補, 選択候補, 説明文の色を分けて視認性を確保します.
+      # 通常候補、選択候補、説明文の色を分けて視認性を確保する。
       text: green
       selected_text: green_reverse
       description_text: yellow
@@ -38,28 +38,28 @@ $env.config = ($env.config | upsert menus (
   }]
 ))
 
-# `fish` が利用できる環境では, 外部コマンド補完を `fish` に委譲します.
-# `fish` がない環境では, 既存の補完設定をそのまま使います.
+# `fish` が利用できる環境では、外部コマンド補完を `fish` に委譲する。
+# `fish` がない環境では、既存の補完設定をそのまま使う。
 if not ((which fish) | is-empty) {
   let fish_completer = {|spans|
-    # Nushell から渡された入力トークン列を, `fish --command` へ渡せる 1 本の文字列へ整形します.
+    # Nushell から渡された入力トークン列を、`fish --command` へ渡せる 1 本の文字列へ整形する。
     let escaped_spans = ($spans | str replace --all "'" "\\'" | str join " ")
     let fish_command = $"complete '--do-complete=($escaped_spans)'"
 
-    # `fish` の補完結果を TSV として読み取り, Nushell の補完候補レコードへ変換します.
+    # `fish` の補完結果を TSV として読み取り、Nushell の補完候補レコードへ変換する。
     fish --command $fish_command
     | from tsv --flexible --noheaders --no-infer
     | rename value description
     | update value {|row|
       let value = $row.value
-      # 空白や括弧を含むパス候補は, そのまま挿入すると再入力が必要になるため引用符で包みます.
+      # 空白や括弧を含むパス候補は、そのまま挿入すると再入力が必要になるため引用符で包む。
       let needs_quote = (
         [' ' '[' ']' '(' ')' "'" '"' '`']
         | any {|char| $value | str contains $char }
       )
 
       if ($needs_quote and ($value | path exists)) {
-        # `~` 付きパスも実体へ展開し, その後にダブルクォート内で安全に使える形へエスケープします.
+        # `~` 付きパスも実体へ展開し、その後にダブルクォート内で安全に使える形へエスケープする。
         let expanded_path = if ($value | str starts-with "~") {
           $value | path expand --no-symlink
         } else {
@@ -73,7 +73,7 @@ if not ((which fish) | is-empty) {
   }
 
   let external_completions = (
-    # 既存の外部補完設定を土台にしつつ, 有効化フラグと completer だけを差し替えます.
+    # 既存の外部補完設定を土台にしつつ、有効化フラグと completer だけを差し替える。
     $env.config.completions.external
     | upsert enable true
     | merge { completer: $fish_completer }
@@ -82,7 +82,7 @@ if not ((which fish) | is-empty) {
   $env.config = ($env.config | upsert completions.external $external_completions)
 }
 #
-# ls を停止するには, pre_prompt から ls の hook のみを除去します.
+# ls を停止するには、pre_prompt から ls の hook のみを除去する。
 let pre_prompt_hooks = ($env.config.hooks.pre_prompt? | default [])
 let filtered_hooks = ($pre_prompt_hooks | where {|hook|
   let hook_text = ($hook | to nuon --serialize | str trim | str replace '"' "")
