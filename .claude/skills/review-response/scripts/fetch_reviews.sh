@@ -14,6 +14,7 @@
 #   reviews          : 全体レビュー (id、state、body、submittedAt、author)
 #   inline_comments  : インライン comment (id、in_reply_to_id、path、line,
 #                       original_line, original_commit_id, body, user)
+#   issue_comments   : 通常の PR コメント (id、author、body、createdAt)
 
 set -euo pipefail
 
@@ -32,16 +33,22 @@ PR_INFO=$(gh pr view "$PR_NUMBER" \
 # インライン review comment 一覧 (全ページ取得)
 INLINE=$(gh api --paginate "repos/${REPO}/pulls/${PR_NUMBER}/comments" | jq -s 'add')
 
-# 両者を統合した JSON を出力
+# 通常の PR コメント一覧 (issue コメント API、全ページ取得)
+ISSUE_COMMENTS=$(gh api --paginate "repos/${REPO}/issues/${PR_NUMBER}/comments" | jq -s 'add')
+
+# 三者を統合した JSON を出力
 # --argjson は Linux の MAX_ARG_STRLEN (128KB) を超えると失敗するため、
 # 一時ファイル経由で渡す。
 _TMP_PR=$(mktemp)
 _TMP_INLINE=$(mktemp)
-trap 'rm -f "$_TMP_PR" "$_TMP_INLINE"' EXIT
+_TMP_ISSUE_COMMENTS=$(mktemp)
+trap 'rm -f "$_TMP_PR" "$_TMP_INLINE" "$_TMP_ISSUE_COMMENTS"' EXIT
 printf '%s' "$PR_INFO" > "$_TMP_PR"
 printf '%s' "$INLINE" > "$_TMP_INLINE"
+printf '%s' "$ISSUE_COMMENTS" > "$_TMP_ISSUE_COMMENTS"
 
-jq -n --slurpfile pr "$_TMP_PR" --slurpfile inline "$_TMP_INLINE" '{
+jq -n --slurpfile pr "$_TMP_PR" --slurpfile inline "$_TMP_INLINE" \
+    --slurpfile issue_comments "$_TMP_ISSUE_COMMENTS" '{
     state: $pr[0].state,
     isDraft: $pr[0].isDraft,
     reviewDecision: $pr[0].reviewDecision,
@@ -56,5 +63,10 @@ jq -n --slurpfile pr "$_TMP_PR" --slurpfile inline "$_TMP_INLINE" '{
         id, in_reply_to_id, path, line,
         original_line, original_start_line, original_commit_id, body,
         user: .user.login
+    })),
+    issue_comments: ($issue_comments[0] | map({
+        id, body,
+        createdAt: .created_at,
+        author: .user.login
     }))
 }'

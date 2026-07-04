@@ -30,8 +30,10 @@
     - 該当 review thread または PR コメントへ返答する。
         - 採用 → 何をどう直したかを返答する。
         - 非採用 / 別 Issue / 要件変更 → 理由と今後の扱いを返答する。
-        - レビュー全体への返答: `bash .claude/skills/review-response/scripts/reply_review.sh <PR番号> <review_node_id> <body_file>` を使う。
-        - インライン返答: `bash .claude/skills/review-response/scripts/reply_inline.sh <PR番号> <comment_id> <body_file> <commit_hash|->` を使う。`<commit_hash>` には必ずその指摘に対応したコミットを指定すること。コミット URL 不要な場合は `-` を渡す。
+        - レビュー全体への返答: `bash .claude/skills/review-response/scripts/reply_review.sh <PR番号> <review_node_id> <body_file> <commit_hash|->` を使う。
+        - インライン返答: `bash .claude/skills/review-response/scripts/reply_inline.sh <PR番号> <comment_id> <body_file> <commit_hash|->` を使う。
+        - 通常の PR コメントへの返答: `bash .claude/skills/review-response/scripts/reply_comment.sh <PR番号> <comment_id> <body_file> <commit_hash|->` を使う。
+        - いずれも `<commit_hash>` には必ずその指摘に対応したコミットを指定すること。コミット URL 不要な場合は `-` を渡す。
 - Issue の `完了条件` を実態に合わせて更新する。
     - スコープ変更が入る場合は、チェック状態だけを動かさず、先に本文を更新すること。
     - 新しい独立要求は現 Issue を肥大化させず、後続 Issue に分離すること。
