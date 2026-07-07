@@ -2,66 +2,49 @@
 
 ## 概要
 
-マージ可能条件を確認し、ユーザーへ最終マージを依頼する。
-マージ前に origin の default branch への追従を行い、マージ後は Issue、worktree、branch の後処理を行って次の作業に入れる状態に戻す。
-PR がすでに merge 済みの場合は後処理だけを実行する。
+マージ可能条件を確認し、ユーザーへ最終マージを依頼する。マージ前には origin の default branch への追従を行い、マージ後には Issue、worktree、ブランチの後処理を行って、次の作業に入れる状態へ戻す。PR がすでに merge 済みの場合は、後処理だけを実行する。
 
 ## 手順
 
-- 制御用 worktree で実行していることを確認する。
-    - default branch にいること、無関係な未コミット差分がないこと。
-- Issue のコメント履歴から branch 名と PR を確認する。
-    - branch 名と PR が見つからない場合は中断すること。
-    - worktree path は sync_main の配置規則に従う。
-- PR の状態を確認し、分岐する。
-    - `MERGED` の場合 → 後処理へ進む。
-    - `CLOSED` かつ未 merge の場合 → 中断し、継続 / abandon をユーザーに確認すること。
-    - `OPEN` の場合 → 以降の手順へ進む。
-- 作業用 worktree で origin の default branch に追従する。
-    - worktree が存在しない場合は create_branch に戻ること。
-    - origin の default branch に rebase する。
-    - rebase で HEAD が変わった場合は `push --force-with-lease` し、review-response スキルに戻って checks / review を再確認すること。
-- マージ可否を判定する。
-    - Issue の `完了条件` がすべて達成済みであること。
-    - PR が open、draft でない、レビュー承認済み、checks 通過、競合なし
-    - 条件を満たさない場合は review-response スキルに戻ること。
-- マージ方法を決める。
-    - merge queue を使わない場合:
-        - 進捗コメントで状態を `マージ待ち` に記録する。
-        - ユーザーへマージを依頼する (テンプレートは下記参照)。
-        - ユーザーが GitHub Web でマージする。AI Agent が代行する場合は認証後に `gh pr merge` を実行する。
-    - merge queue を使う場合:
-        - 進捗コメントで状態を `merge queue 待ち` に記録する。
-        - ユーザーへ queue 投入を依頼する。AI Agent が代行する場合は認証後に `gh pr merge --auto` を実行する。
-        - wait_user_review へ戻り、`MERGED` になるまで待つ。
-- マージ後の確認と後処理を行う。
-    - PR が `MERGED` であることを確認する。
-    - Issue のクローズ状態を確認する (`Closes` による自動クローズ、または手動)。
-    - 進捗コメントで状態を `完了` に記録する。
-    - `bash .claude/skills/development-flow/scripts/cleanup.sh <PR番号> [--yes]` で remote branch 削除 → worktree 削除 → local branch 削除 → default branch 同期を一括して行う。
-        - 実行場所はメインリポジトリーとすること。削除対象の worktree 内から実行すると、削除後にカレントディレクトリが消えてシェルが追従できなくなる。
-        - `--yes` を付けると remote branch 削除の確認プロンプトをスキップする。非対話環境 (Claude Code など) ではこれを付けること。
-        - コマンド例:
-            ```bash
-            # 実行場所: メインリポジトリー
-            cd /path/to/repo
-            bash .claude/skills/development-flow/scripts/cleanup.sh 123 --yes
-            ```
-- 最終結果をユーザーへ要約する。
+### 事前確認
 
-### 後処理の順序
+この段階は制御用 worktree (メインリポジトリー) で実行する。まず、default branch にいることと、無関係な未コミット差分がないことを確認する。次に、Issue のコメント履歴からブランチ名と PR を特定する。特定できない場合は中断し、ユーザーに確認する。作業用 worktree の path は、ブランチ名から [sync_main.md](./sync_main.md) の配置規則で求める。
 
-後処理は以下の順で行うこと。worktree を先に削除しないと local branch の削除が失敗する。
+続いて PR の状態を確認し、進み方を分岐する。`MERGED` の場合はマージ後の確認と後処理へ進む。`CLOSED` かつ未マージの場合は中断し、作業を継続するか abandon するかをユーザーに確認する。`OPEN` の場合は以降の手順へ進む。
 
-1. remote branch の削除
-2. worktree の削除
-3. local branch の削除
-4. default branch の同期
+### default branch への追従
 
-### local branch 削除の注意
+マージの前に、作業用 worktree で origin の default branch に rebase して追従する。worktree が存在しない場合は [create_branch.md](./create_branch.md) に戻って用意し直す。rebase で HEAD が変わった場合は `push --force-with-lease` で反映し、review-response スキルに戻って checks とレビューの状態を再確認する。履歴が変わると、既存の承認や CI の結果が最新のコードに対するものでなくなるためである。なお、強制 push に `--force` は使わず、必ず `--force-with-lease` を使う。リモートに自分の知らないコミットが積まれていた場合に、気づかず上書きしてしまう事故を防ぐためである。
 
-`Squash and merge` や `Rebase and merge` を使うと、local の作業 branch が default branch の祖先にならず `git branch -d` が失敗することがある。
-PR が `MERGED` で変更が取り込まれていれば問題ないので、必要なら `git branch -D` を使うこと。
+### マージ可否の判定
+
+Issue の完了条件がすべて達成済みであることと、PR が open であり、draft でなく、レビュー承認済みで、checks を通過し、競合がないことを確認する。ひとつでも満たさない場合は review-response スキルに戻る。
+
+### マージの依頼
+
+マージの進め方は、merge queue を使うかどうかで分かれる。どちらの場合も、進捗コメントの投稿には `bash .claude/skills/development-flow/scripts/add_progress_comment.sh <issue番号> <body_file>` を使う。
+
+merge queue を使わない場合は、進捗コメントで状態を「マージ待ち」に記録し、下記のマージ依頼テンプレートでユーザーへマージを依頼する。マージはユーザーが GitHub Web で行うことを基本とし、AI Agent が代行する場合は承認を得てから `gh pr merge` を実行する。
+
+merge queue を使う場合は、進捗コメントで状態を「merge queue 待ち」に記録し、下記の投入依頼テンプレートで queue への投入を依頼する。AI Agent が代行する場合は承認を得てから `gh pr merge --auto` を実行する。投入後は PR が `MERGED` になるまで待ち、checks の失敗などで queue から外れた場合は review-response スキルに戻って対応する。
+
+### マージ後の確認と後処理
+
+PR が `MERGED` になったことを確認したら、Issue のクローズ状態 (`Closes` による自動クローズ、または手動クローズ) を確かめる。後処理 (worktree やブランチの削除) をマージ確定より前に行ってはならない。マージ前に消してしまうと、指摘対応などで作業へ戻る手段を失うためである。
+
+後処理は次のスクリプトで一括して行う。リモートブランチの削除という取り消しの難しい操作を含むため、実行前に必ずユーザーの承認を得る。
+
+```bash
+# 実行場所: メインリポジトリー
+cd /path/to/repo
+bash .claude/skills/development-flow/scripts/cleanup.sh 123 --yes
+```
+
+実行場所は必ずメインリポジトリーとする。削除対象の worktree 内から実行すると、削除後にカレントディレクトリーが消えてシェルが追従できなくなるためである。`--yes` はリモートブランチ削除の確認プロンプトをスキップするオプションであり、承認を対話プロンプトではなく事前のやり取りで得ている非対話環境 (Claude Code など) では、これを付けて実行する。
+
+スクリプトは、remote branch の削除、worktree の削除、local branch の削除、default branch の同期をこの順で実行する。worktree を先に削除しないと local branch の削除が失敗するため、順序を入れ替えてはならない。なお、`Squash and merge` や `Rebase and merge` でマージした場合は、local の作業ブランチが default branch の祖先にならず `git branch -d` が失敗することがあるが、PR が `MERGED` で変更が取り込まれていれば問題はなく、スクリプトが `git branch -D` にフォールバックして削除する。
+
+後処理まで終えたら、進捗コメントで状態を「完了」に記録し、最終結果 (マージされた PR、Issue のクローズ状態、後処理の内容) をユーザーへ要約する。「完了」が後処理まで済んだことを表す状態であるため、記録は後処理の後に行う。
 
 ### マージ依頼テンプレート
 
@@ -92,15 +75,9 @@ merge queue への投入準備が完了しました。
 GitHub Web で `Add to merge queue` または `Merge when ready` をお願いします。
 ```
 
-## 原則
-
-- 後処理 (worktree 削除、branch 削除) は merge 確定後にのみ行うこと。
-- `--force` は使わず、必要時は `--force-with-lease` のみ使うこと。
-- 判断に迷う場合は作業を中断し、ユーザーに報告・相談すること。
-
 ## この段階の完了条件
 
 - [ ] 対象変更が default branch に取り込まれている。
-- [ ] 進捗コメントで `完了` が記録されている。
-- [ ] 作業用 worktree と branch が削除されている。
+- [ ] 進捗コメントで「完了」が記録されている。
+- [ ] 作業用 worktree とブランチが削除されている。
 - [ ] 制御用 worktree の default branch が同期されている。
