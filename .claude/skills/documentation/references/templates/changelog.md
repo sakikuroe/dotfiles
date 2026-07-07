@@ -1,13 +1,9 @@
 # Changelog
 
 <!--
-本ファイルの書き方は Keep a Changelog (https://keepachangelog.com/)、バージョン番号は Semantic Versioning (https://semver.org/) に従う。
-運用の詳細は documentation スキルの references/changelog.md を参照すること。
+本ファイルの書き方は Keep a Changelog (https://keepachangelog.com/)、バージョン番号は Semantic Versioning (https://semver.org/) に従う。運用の詳細は documentation スキルの references/changelog.md を正本とする。
 
-- 利用者にとって意味のある変更を、利用者の言葉で書く。コミットの羅列にしない。
-- 新しいバージョンほど上に書く。
-- 未リリースの変更は [Unreleased] に貯め、リリース時にバージョン節へ移す。
-- 各節では Added / Changed / Deprecated / Removed / Fixed / Security のうち該当するものだけを使う。
+書くのは、利用者にとって意味のある変更である。コミットは開発者が読む記録であるため、その羅列をそのまま貼らず、利用者の言葉に直して載せる。未リリースの変更は [Unreleased] に貯めておき、リリース時にバージョン節 `## [x.y.z] - YYYY-MM-DD` へ移す。バージョン節は新しいものほど上に置く。各節の中では Added / Changed / Deprecated / Removed / Fixed / Security の分類を使い、リリース時に該当のない分類の見出しは削除する。
 -->
 
 ## [Unreleased]
