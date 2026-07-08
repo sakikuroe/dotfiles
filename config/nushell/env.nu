@@ -132,7 +132,7 @@ def git_block [] {
 def left_prompt [] {
   let t = (date now | format date "%Y-%m-%d %H:%M:%S%:z")
   let user = (^whoami | str trim)
-  let host = (^hostname | str trim)
+  let host = (sys host | get hostname)
   let p = (pretty_pwd)
   let g = (git_block)
   let ws = (wezterm_workspace)
