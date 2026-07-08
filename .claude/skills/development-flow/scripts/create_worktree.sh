@@ -2,7 +2,7 @@
 # Usage: create_worktree.sh <branch_name>
 #
 # Creates a branch (if not already existing) and a worktree at the standard path:
-#   ~/.worktrees/<repo>-<branch-with-slashes-as-dashes>
+#   <repo>/.worktrees/<branch-with-slashes-as-dashes>
 
 set -euo pipefail
 
@@ -12,11 +12,18 @@ if [[ $# -lt 1 ]]; then
 fi
 
 BRANCH="$1"
-# worktree 内から実行された場合でも正しいリポジトリ名を得るため、
+# worktree 内から実行された場合でも正しいリポジトリのルートを得るため、
 # --show-toplevel ではなく worktree list の先頭行 (メイン worktree) を使う。
-REPO_NAME=$(basename "$(git worktree list --porcelain | awk 'NR==1{print $2}')")
+REPO_ROOT=$(git worktree list --porcelain | awk 'NR==1{print $2}')
 BRANCH_SAFE="${BRANCH//\//-}"
-WORKTREE_PATH="$HOME/.worktrees/${REPO_NAME}-${BRANCH_SAFE}"
+WORKTREE_PATH="$REPO_ROOT/.worktrees/${BRANCH_SAFE}"
+
+# .worktrees/ を git の追跡対象から除外する (共有される .gitignore ではなく、
+# 各 clone のローカル設定である .git/info/exclude に加筆する)。
+EXCLUDE_FILE="$REPO_ROOT/.git/info/exclude"
+if ! grep -qx '.worktrees/' "$EXCLUDE_FILE" 2>/dev/null; then
+    echo '.worktrees/' >> "$EXCLUDE_FILE"
+fi
 
 echo "branch:  $BRANCH"
 echo "worktree: $WORKTREE_PATH"

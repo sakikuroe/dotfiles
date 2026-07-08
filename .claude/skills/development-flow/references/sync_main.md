@@ -14,7 +14,7 @@
 
 ## worktree の配置先
 
-作業用 worktree は `~/.worktrees/<リポジトリー名>-<ブランチ名>` に配置し、ブランチ名に含まれる `/` は `-` に置換する。たとえばリポジトリー `my-app` とブランチ `feature/123-add-search` の組であれば、配置先は `~/.worktrees/my-app-feature-123-add-search` となる。path は Issue に記録せず、ブランチ名からこの規則で都度求める。path を記録すると、環境の違いや再作成のたびに実態とずれていくためである。
+作業用 worktree は、元の clone のリポジトリ直下の `.worktrees/<ブランチ名>` に配置し、ブランチ名に含まれる `/` は `-` に置換する。たとえばブランチ `feature/123-add-search` であれば、配置先は `.worktrees/feature-123-add-search` となる。`.worktrees/` は `.git/info/exclude` に加筆して git の追跡対象から除外し、コミットや差分に混ざらないようにする。path は Issue に記録せず、ブランチ名からこの規則で都度求める。path を記録すると、環境の違いや再作成のたびに実態とずれていくためである。
 
 ## この段階の完了条件
 
