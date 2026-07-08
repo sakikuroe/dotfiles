@@ -1,6 +1,8 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "autoupdate": false,
+  // セッションを誤って外部に共有しないよう、明示的に無効化する。
+  "share": "disabled",
   // opencode-isolate: エージェントの作業を git worktree に隔離するプラグイン。
   // 破壊的変更を無警告で取り込まないよう、バージョンを固定する。
   "plugin": [
