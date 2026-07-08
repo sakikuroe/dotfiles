@@ -189,7 +189,7 @@ Proposed (YYYY-MM-DD)
 
   ```md
   - #200 注文管理システムの技術選定 (本 ADR の元となった Issue)
-  - `docs/design/0001-order-management.md` (本 ADR を切り出した Design Doc)
+  - `docs/design/20260110-order-management.md` (本 ADR を切り出した Design Doc)
   - https://www.postgresql.org/docs/current/datatype-json.html (PostgreSQL JSONB の公式ドキュメント)
   ```
 -->
