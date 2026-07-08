@@ -4,6 +4,11 @@
 #   1 行目: [HH:MM:SS] <pwd(~置換)> <git-branch(あれば)>
 #   2 行目: >>> (入力インジケーター)
 
+# `~/.bashrc` の `export PATH="$HOME/.local/bin:$PATH"` を `nu` でも再現する。
+# `claude` はここに入るため、PATH へ追加する。
+let local_bin = ($nu.home-dir | path join ".local" "bin" | path expand)
+$env.PATH = ($env.PATH | where {|it| ($it | path expand) != $local_bin } | prepend $local_bin)
+
 # `~/.bashrc` の `export PATH="$HOME/.npm-global/bin:$PATH"` を `nu` でも再現する。
 # `codex` は npm global に入るため、先頭へ配置して優先的に解決する。
 let npm_global_bin = ($nu.home-dir | path join ".npm-global" "bin" | path expand)
