@@ -7,7 +7,7 @@
 
 - `coding-rules`: C++ と Rust のコーディングルール
 - `development-flow`: GitHub Issue を起点とする AI 主導の開発フローであり、全体の順序を統括し、ワークスペース準備 (main 同期、ブランチ・worktree 作成) とマージ・後処理を直接担う。
-- `issue-planning`: Issue の起票と実装計画の作成・提示
+- `issue-planning`: Issue の起票
 - `implementation`: 計画に沿った実装を行う。コミットは git-committer サブエージェントに委託する。
 - `pr-creation`: push と PR 作成
 - `review-response`: レビュー対応

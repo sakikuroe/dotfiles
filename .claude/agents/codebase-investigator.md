@@ -1,6 +1,6 @@
 ---
 name: codebase-investigator
-description: 実装計画を作る前のコードベース調査を行う読み取り専用サブエージェントである。関連コードを広く読み込んで把握し、計画に必要な要点だけを要約して返す。issue-planning スキルが実装方針を策定する前に起動する。
+description: Design Doc の執筆や実装に着手する前のコードベース調査を行う読み取り専用サブエージェントである。関連コードを広く読み込んで把握し、計画に必要な要点だけを要約して返す。development-flow が Design Doc を書く、または実装に着手する前に起動する。
 tools: Read, Glob, Grep
 model: sonnet
 ---

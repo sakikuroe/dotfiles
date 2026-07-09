@@ -2,7 +2,7 @@
 
 ## 概要
 
-マージ可能条件を確認し、ユーザーへ最終マージを依頼する。マージ前には origin の default branch への追従を行い、マージ後には Issue、worktree、ブランチの後処理を行って、次の作業に入れる状態へ戻す。PR がすでに merge 済みの場合は、後処理だけを実行する。
+マージ可能条件を確認し、ユーザーへ最終マージを依頼する。マージ前には origin の default branch への追従と、書いた ADR・Design Doc があればそのステータス確定を行い、マージ後には Issue、worktree、ブランチの後処理を行って、次の作業に入れる状態へ戻す。PR がすでに merge 済みの場合は、後処理だけを実行する。
 
 ## 手順
 
@@ -16,9 +16,19 @@
 
 マージの前に、作業用 worktree で origin の default branch に rebase して追従する。worktree が存在しない場合は [create_branch.md](./create_branch.md) に戻って用意し直す。rebase で HEAD が変わった場合は `push --force-with-lease` で反映し、review-response スキルに戻って checks とレビューの状態を再確認する。履歴が変わると、既存の承認や CI の結果が最新のコードに対するものでなくなるためである。なお、強制 push に `--force` は使わず、必ず `--force-with-lease` を使う。リモートに自分の知らないコミットが積まれていた場合に、気づかず上書きしてしまう事故を防ぐためである。
 
+### ADR・Design Doc のステータス確定
+
+この時点で PR のレビューが Approve 済みであることを確認する。Approve 前であれば review-response スキルに戻り、指摘対応と再レビューの依頼を続ける。
+
+Approve 済みであれば、マージを依頼する前に、この PR で ADR や Design Doc を書いていないかを確認する。ADR を Proposed で書いていれば Accepted に、Design Doc を Approved のまま実装を進めてきていれば Implemented に変更する (documentation スキルの [adr.md](../../documentation/references/adr.md)・[design_doc.md](../../documentation/references/design_doc.md) を参照)。変更は git-committer サブエージェントに委譲してコミットし、push する。
+
+この push はステータス行だけの変更であり、設計や実装の内容そのものは変えないため、レビューを取り直す必要はない。ただし、push によってレビュー承認が失効する設定 (dismiss stale reviews) が有効なリポジトリでは承認が失効することがあるため、失効していないかを確認し、失効していた場合は review-response スキルに戻ってレビューを依頼し直す。また push によって checks が再実行されることがあるため、次の「マージ可否の判定」で改めて通過を確認する。
+
+この PR に ADR も Design Doc もない場合、この手順は不要である。
+
 ### マージ可否の判定
 
-Issue の完了条件がすべて達成済みであることと、PR が open であり、draft でなく、レビュー承認済みで、checks を通過し、競合がないことを確認する。ひとつでも満たさない場合は review-response スキルに戻る。
+Issue の完了条件がすべて達成済みであることと、PR が open であり、draft でなく、レビュー承認済みで、checks を通過し、競合がなく、ADR や Design Doc を書いている場合はそのステータスが確定済みであることを確認する。ひとつでも満たさない場合は、レビュー指摘が原因であれば review-response スキルに、ステータス確定が済んでいないことが原因であれば前節の手順に戻る。
 
 ### マージの依頼
 
@@ -77,6 +87,7 @@ GitHub Web で `Add to merge queue` または `Merge when ready` をお願いし
 
 ## この段階の完了条件
 
+- [ ] 該当する ADR・Design Doc がある場合、ステータスが確定し push 済みである。
 - [ ] 対象変更が default branch に取り込まれている。
 - [ ] 進捗コメントで「完了」が記録されている。
 - [ ] 作業用 worktree とブランチが削除されている。
