@@ -59,7 +59,7 @@ if not ((which fish) | is-empty) {
       )
 
       if ($needs_quote and ($value | path exists)) {
-        # `~` 付きパスも実体へ展開し、その後にダブルクォート内で安全に使える形へエスケープする。
+        # `~` 付きパスも実体へ展開し、その後にダブルクォート内で安全に使用できる形へエスケープする。
         let expanded_path = if ($value | str starts-with "~") {
           $value | path expand --no-symlink
         } else {

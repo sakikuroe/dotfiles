@@ -1,66 +1,46 @@
 ---
 name: documentation
-description: 機能コード以外の開発情報を「どこに書き、どこには書かないか」を定めるスキルである。Issue・PR・コミット・コードコメント・ADR・docs・CHANGELOG のいずれに何を書くか迷うとき、ドキュメントを書くとき、設計判断を ADR に残すとき、リリースに向けて CHANGELOG を更新するときに使用する。
+description: 機能コード以外の開発情報を「どこに書き、どこには書かないか」を定めるスキルである。Issue・PR・コミット・コードコメント・ADR・Design Doc・docs・CHANGELOG のいずれに何を書くか迷うとき、ドキュメントを書くとき、設計判断を ADR や Design Doc に残すとき、リリースに向けて CHANGELOG を更新するときに使用する。
 ---
 
-## 概要
+## 本スキルが解決する問題
 
-ソフトウェア開発では、機能コードそのもの以外に多くの情報が生まれる。課題や背景、期待する動作、検討した代替案、実際の変更内容、現在の仕様、設計判断、使い方、変更履歴などである。これらを「どの成果物に書き、どこには書かないか」が定まっていないと、同じ事実が複数箇所に重複したり、どこにも書かれず失われたりする。
+ソフトウェア開発では、機能のソースコード以外にも、課題の背景、期待する動作、検討した代替案、実際の変更内容、現在の仕様、設計上の判断、使い方、変更履歴など、多岐にわたる情報が生み出される。これらの情報を「どの成果物に書き、どこには書かないか」というルールが明確でないと、同じ内容が複数の場所に記載されて矛盾が生じたり、逆にどこにも記録されずに失われたりしてしまう。
 
-本スキルは、これらの情報の置き場を 1 か所に定める。中心となるのは、各成果物について「書くこと」と「書かないこと」を一覧した置き場マップである。各行の詳しい根拠と例は [references/placement_map.md](./references/placement_map.md) で詳述する。
+本スキルは、こうした各種情報の置き場をそれぞれ1か所に定めることを目的とする。ルールの中心となるのは、各成果物に「書くべきこと」と「書くべきでないこと」を対照させた「置き場マップ」であり、その正本は [references/placement_map.md](./references/placement_map.md) に配置している。本ファイルでは、置き場を判断するための基本的な考え方のみを解説する。
 
-## 2 つの軸
+## 情報を「変更系」と「恒常系」のどちらで扱うか
 
-情報は性質によって 2 つの系に分かれ、扱い方が異なる。
+情報は、その性質によって「変更系」と「恒常系」の2つに大別され、それぞれ扱い方が異なる。
 
-- 変更系 (Issue / 実装計画 / PR / コミット / 進捗コメント): 1 つの変更の「いつ・なぜ・何を変えたか」を時点で記録する。マージ後は凍結し、書き換えない。
-- 恒常系 (コードコメント / ADR / docs / README / CHANGELOG): 「いまどうなっているか」を表す。変更のたびに更新し、常に現在の状態を反映させる。
+Issue、実装計画、Pull Request（PR）、コミットメッセージ、Design Doc といった変更系の情報は、特定の変更に関して「いつ・なぜ・何を変えたか」を記録するスナップショットである。これらは変更が完了した時点で凍結し、以後は書き換えない。
 
-変更系だけでは「現在どうなっているか」を復元できず、恒常系だけでは「なぜそうなったか」を辿れない。両方を、それぞれの役割に絞って持つ。
+一方、コードコメント、ADR、ドキュメント（docs）、README、CHANGELOG といった恒常系の情報は、「現在どうなっているか」を示すものである。これらは変更のたびに更新し、常に最新の状態を反映させる。
 
-## 重複を減らす原則
+これらはどちらか一方だけでは不十分である。変更系だけでは過去の記録を時系列で読み解かなければ現在の仕様が把握できず、恒常系だけでは「なぜ今の形になったのか」という経緯を辿れない。したがって、両者をそれぞれの役割に特化させたうえで併用する必要がある。
 
-- 1 事実 1 正本: 1 つの事実は 1 か所だけに書く。
-- コピーせずリンク: 別の場所から同じ事実に触れたいときは、内容を複製せず正本へリンクする。参照の方向は「変更系 → 恒常系」を基本とする。
-- 意思決定の振り分け: その変更限りの理由は PR 本文に書く。将来の実装を縛る決定は ADR へ昇格させる ([references/adr.md](./references/adr.md))。
+## 同じ事実を 2 か所に書かず、1 事実に対して 1 正本とする
 
-## 置き場マップ
+置き場を定めても、同じ内容をあちこちへ書き写していては意味がない。そこで、1 つの事実は 1 か所だけを正本として書き、別の場所から同じ事実に触れたいときは、内容を複製せず正本へリンクする。リンクの向きは「変更系 → 恒常系」を基本とする。これは、凍結された過去の記録から、常に更新され続ける最新の情報を参照するのが自然であるためである。
 
-機能コード以外のすべての情報は、次のいずれか 1 か所を正本とする。迷ったときは、その情報が「1 つの変更の記録」なのか「現在の状態」なのかをまず判断し、該当する系の表から置き場を選ぶ。
+意思決定の経緯についても、この原則に沿って振り分けることにする。その変更のみで完結する理由は PR 本文に書けば十分だが、将来の実装に影響を与える重要な決定は ADR として独立 (昇格) させ、PR からはその ADR へリンクを張るようにする ([references/adr.md](./references/adr.md))。
 
-### 変更系 (1 変更ごとに作り、マージ後は凍結する)
+## 置き場マップの引き方
 
-| 置き場所 | ここに書く (正本) | ここには書かない (→ 正しい置き場) |
-| --- | --- | --- |
-| Issue 本文 | 課題・背景・動機、利用者視点の期待動作、受け入れ基準 (完了条件)、スコープ外 | 実装手段・API・設定・アーキ全体像 (→ docs)、進捗 (→ Issue コメント) |
-| Issue コメント (実装計画) | 実装方針、変更対象、検討した代替案と却下理由、テスト方針 | 確定後の現在仕様 (→ reference)、将来を縛る決定 (→ ADR) |
-| Issue コメント (進捗) | ブランチ名・PR・状態 | 設計・仕様・知見 (→ 各正本) |
-| PR 本文 | 対応 Issue、変更概要、計画からの乖離点 (計画へリンク)、スコープ外、動作確認・テスト結果、恒常 docs 更新の確認 | Issue 背景の再掲、現在仕様の全体 (→ docs)、決定の正本 (→ ADR、PR はリンク) |
-| コミットメッセージ | 1 関心事の変更内容とその理由 | 大きな設計判断の正本 (→ ADR) |
+機能コード以外のすべての情報は、必ずどこか 1 か所を正本とする。どこに書くか迷った場合は、まずその情報が「1 つの変更の記録 (変更系)」なのか「現在の状態 (恒常系)」なのかを判断し、[references/placement_map.md](./references/placement_map.md) にある置き場所の表から適切なものを選ぶ。
 
-### 恒常系 (現在の状態を表し、変更のたびに更新する)
-
-| 置き場所 | ここに書く (正本) | ここには書かない (→ 正しい置き場) |
-| --- | --- | --- |
-| コードコメント | 局所的な「なぜこの行・このやり方か」、前提・落とし穴 | 全体の仕様・設計判断 (→ docs / ADR) |
-| ADR (`docs/adr`) | 将来を縛る設計判断と、その文脈・却下案・結果 | 使い方 (→ how-to)、変更手順 (→ PR)、受理後は不変 (supersede で更新) |
-| docs / reference | 現在の仕様・API・設定の正確な事実 | なぜそうしたか (→ explanation / ADR)、手順 (→ how-to) |
-| docs / explanation | 設計の背景・仕組み・なぜこうなっているか | 網羅的な仕様の逐一 (→ reference)、手順 (→ how-to) |
-| docs / how-to | 特定の目的を達成する手順 | 概念の説明 (→ explanation)、網羅仕様 (→ reference) |
-| docs / tutorial | 初学者向けの学習導線 | 網羅的なリファレンス (→ reference) |
-| README | プロジェクト概要・導入・docs への入口 | 詳細な仕様 (→ docs) |
-| CHANGELOG | バージョン間の利用者向け変更点 (Added/Changed/Fixed 等) | 内部実装の詳細 (→ PR / コミット) |
-
-docs の 4 分類 (reference / explanation / how-to / tutorial) の使い分けは [references/diataxis.md](./references/diataxis.md) を、各行の詳しい根拠と例は [references/placement_map.md](./references/placement_map.md) を参照する。
+表を見ただけでは判断しきれない場合は、同ファイル内に記載されている各項目の詳述 (判断根拠と実例) を確認する。ドキュメントを作成・レビューする際は、着手前に必ずこのマップを参照すること。
 
 ## 参照文書
 
-- [references/placement_map.md](./references/placement_map.md): 置き場マップの各行を詳述する。迷ったときの最終的な判断根拠
-- [references/adr.md](./references/adr.md): ADR をいつ・どう書くか。Status の遷移、supersede、PR の判断理由からの昇格基準
-- [references/diataxis.md](./references/diataxis.md): docs を Diátaxis の 4 分類に分ける指針
-- [references/changelog.md](./references/changelog.md): CHANGELOG の運用（Keep a Changelog の分類、Semantic Versioning、コミットとの関係）
+- [references/placement_map.md](./references/placement_map.md): 置き場マップの正本。変更系・恒常系それぞれの対照表と、各行の判断根拠・実例を収める。どこに書くか迷ったときの最終的な判断根拠となる。
+- [references/adr.md](./references/adr.md): ADR の運用を定める。いつ書くか、Status の遷移、supersede、PR の判断理由からの昇格基準を扱う。
+- [references/design_doc.md](./references/design_doc.md): Design Doc の運用を定める。いつ書くか、段階の遷移、確定後の凍結、ADR への切り出しを扱う。
+- [references/diataxis.md](./references/diataxis.md): ドキュメントを Diátaxis の 4 分類 (reference / explanation / how-to / tutorial) に分ける指針である。
+- [references/changelog.md](./references/changelog.md): CHANGELOG の運用を定める。Keep a Changelog の分類、Semantic Versioning、コミットとの関係を扱う。
 
 ## テンプレート
 
 - [references/templates/adr.md](./references/templates/adr.md): ADR の本文テンプレート (Nygard 形式)
-- [references/templates/changelog.md](./references/templates/changelog.md): CHANGELOG の雛形 (Keep a Changelog)
+- [references/templates/design_doc.md](./references/templates/design_doc.md): Design Doc の本文テンプレート
+- [references/templates/changelog.md](./references/templates/changelog.md): CHANGELOG の雛形
