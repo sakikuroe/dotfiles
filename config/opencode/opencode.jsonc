@@ -1,0 +1,35 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "autoupdate": false,
+  // セッションを誤って外部に共有しないよう、明示的に無効化する。
+  "share": "disabled",
+  // opencode-isolate: エージェントの作業を git worktree に隔離するプラグイン。
+  // 破壊的変更を無警告で取り込まないよう、バージョンを固定する。
+  "plugin": [
+    "opencode-isolate@0.1.0"
+  ],
+  "permission": {
+    "edit": "allow",
+    "write": "allow",
+    "read": "allow",
+    "grep": "allow",
+    "glob": "allow",
+    // lsp: ローカル LSP サーバーへの問い合わせ (定義ジャンプ等)。読み取り専用で外部通信なし。
+    "lsp": "allow",
+    // patch: apply_patch ツールが実行。ファイル書き換えのみで edit 権限を流用する。外部通信なし。
+    "patch": "allow",
+    "skill": "allow",
+    "todowrite": "allow",
+    "question": "allow",
+    "bash": "ask",
+    // webfetch: 指定した URL に opencode プロセス自身が直接 fetch するだけで、
+    // 中継サービスは介さない。宛先はこちらが指定した URL のみ。
+    "webfetch": "allow",
+    // websearch: 検索クエリの文字列を Exa または Parallel の外部 API へ送信する。
+    // 送信先を選べないため、確認なしでは許可しない。
+    "websearch": "deny"
+  },
+  "compaction": {
+    "prune": false
+  }
+}

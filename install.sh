@@ -214,6 +214,8 @@ ensure_gitconfig() {
 link_pairs=(
   "$DOT/config/nushell/config.nu" "$HOME/.config/nushell/config.nu"
   "$DOT/config/nushell/env.nu" "$HOME/.config/nushell/env.nu"
+  "$DOT/config/opencode/opencode.jsonc" "$HOME/.config/opencode/opencode.jsonc"
+  "$DOT/config/opencode/tui.jsonc" "$HOME/.config/opencode/tui.jsonc"
   "$DOT/config/wezterm/wezterm.lua" "$HOME/.config/wezterm/wezterm.lua"
   "$DOT/config/git/config" "$HOME/.config/git/config"
   "$DOT/config/fontconfig/fonts.conf" "$HOME/.config/fontconfig/fonts.conf"
