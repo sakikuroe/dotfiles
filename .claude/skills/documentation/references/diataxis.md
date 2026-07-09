@@ -32,11 +32,17 @@ docs は、読者の必要に応じて性質の異なる 4 種類に分かれる
 ```
 docs/
 ├── adr/            # 将来を縛る設計判断 (adr.md を参照)
+│   └── 20260115-rate-limit-state-in-redis.md
 ├── design/         # 大きな変更の設計提案。変更系であり、確定後は凍結する (design_doc.md を参照)
+│   └── 20260110-rate-limit-rollout.md
 ├── tutorial/       # 学習導線
+│   └── getting-started.md
 ├── how-to/         # 目的達成の手順
+│   └── raise-a-users-rate-limit.md
 ├── reference/      # 現在の仕様・API・設定
+│   └── api.md
 └── explanation/    # 設計の背景・仕組み
+    └── why-token-bucket.md
 ```
 
 adr/ と design/ は Diátaxis の 4 分類の外にあるが、置き場としては docs の下に同居させる。adr/ の運用は [adr.md](./adr.md) に、design/ の運用は [design_doc.md](./design_doc.md) に従う。
