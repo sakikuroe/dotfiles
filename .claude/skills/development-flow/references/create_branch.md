@@ -17,13 +17,10 @@ bash .claude/skills/development-flow/scripts/create_worktree.sh feature/123-add-
 
 worktree の配置先は [sync_main.md](./sync_main.md) の規則に従う。なお、このスクリプトは `git worktree list` の先頭行からメインリポジトリーを特定するため、worktree 内から実行しても正常に動作する。
 
-worktree が用意できたら、ブランチ名を Issue の進捗コメントとして記録する。これは、作業の中断や再開時に、コメント履歴から作業ブランチを特定できるようにするためである。コメント本文をファイルに書き出し、`bash .claude/skills/development-flow/scripts/add_progress_comment.sh <issue番号> <body_file>` を実行して投稿する。
-
 ブランチの衝突や worktree の不整合など、判断に迷うような事象が発生した場合は、作業を中断してユーザーに報告・相談する。
 
 ## この段階の完了条件
 
 - [ ] Issue 番号付きの作業ブランチが新規作成、または再利用されている。
 - [ ] 作業用の worktree が新規作成、または再利用されている。
-- [ ] 進捗コメントにブランチ名が記録されている。
 - [ ] implementation スキルを開始できる状態になっている。

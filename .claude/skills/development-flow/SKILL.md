@@ -47,7 +47,7 @@ PR が Approve されたら、ADR のステータスを Accepted に、Design Do
 
 各スキルはそれぞれ単独でも利用できるように、対象の Issue や作業ブランチ、実装計画の有無、検証方法などをユーザーに確認する手順が組み込まれている。しかし、本フローの中で各スキルを呼び出す際、前の段階ですでに確定している情報を再度ユーザーに質問してしまうと、フローが不必要に停止してしまう。そのため、本フロー内では確定済みの情報をユーザーに聞き直すことはせず、そのまま次のスキルへ引き継ぐものとする。たとえば、implementation が用いる実装計画には issue-planning で承認済みの計画を利用し、review-response が用いる対応 Issue には本フローで扱っている Issue をそのまま引き継ぐ。検証方法のように、本フロー内でまだ確定していない情報が必要になった場合にのみ、その場でユーザーに確認をとる。
 
-段階をまたいで引き継がれるステータスは、すべて Issue の進捗コメントとして集約される。各スキルは状態に変化があるたびに進捗コメント (ブランチ名・PR・状態など) を投稿する。そのため、中断した作業を再開する際には、Issue のコメント履歴と `git worktree list` や `gh pr view` による現在の状況からいまどのフェーズにいるかを判断し、適切な段階から作業を再開する。
+中断した作業を再開する際には、現在のブランチや worktree、Issue に関連付けられた PR の状態を確認し、適切な段階から作業を再開する。
 
 ## 承認ポイント
 
@@ -60,30 +60,15 @@ GitHub 上で外部から見える成果物を作成する操作や、取り消�
 - `gh pr merge` によるマージ、および merge queue への投入 (development-flow)
 - リモートブランチの削除を含むマージ後の後処理 (development-flow)
 
-上記以外の操作 (コミット、push、Issue への進捗コメント、PR やレビューへの返信など) は、ユーザーの承認を待たずに進めてよい。なお、ここで規定した「操作に対する承認」とは別に、各スキルの中では実装方針の合意、PR 本文の草案の承認、レビューでの指摘事項をどう扱うかといった「内容についての合意」を行う手順が定められているため、それらについては各スキルの手順に従う。また、承認を求めるポイントを最小限に絞ってはいるものの、判断に迷う場合や想定外の事態に遭遇した場合は、どの段階であっても速やかに作業を中断し、ユーザーへ報告・相談を行う。
+上記以外の操作 (コミット、push、PR やレビューへの返信など) は、ユーザーの承認を待たずに進めてよい。なお、ここで規定した「操作に対する承認」とは別に、各スキルの中では実装方針の合意、PR 本文の草案の承認、レビューでの指摘事項をどう扱うかといった「内容についての合意」を行う手順が定められているため、それらについては各スキルの手順に従う。また、承認を求めるポイントを最小限に絞ってはいるものの、判断に迷う場合や想定外の事態に遭遇した場合は、どの段階であっても速やかに作業を中断し、ユーザーへ報告・相談を行う。
 
 ## 役割
 
 AI Agent は、Issue の草案作成、実装と検証、git や gh コマンドの操作、およびレビューでの指摘に対する返答を担当する。ユーザーは、各種承認ポイントでの確認と許可、GitHub の認証、GitHub Web 上でのレビュー、そして最終的なマージ可否の判断を担当する。
 
-## 状態値
-
-作業が進行中である場合は「〜中」、外部からの応答を待っている状態は「〜待ち」として表す。各状態は、括弧内に記載されたスキルが進捗コメントとして記録する。
-
-- `方針レビュー待ち` — 実装方針のコメントを投稿し、ユーザーからの承認を待っている (issue-planning)。
-- `設計レビュー待ち` — Design Doc のドラフト PR を提出し、設計に関するレビューを待っている (development-flow)。
-- `実装中` — 実装および検証を進めている (implementation)。
-- `ドラフトレビュー中` — draft PR を用いて相談や途中段階でのレビューを受けている (pr-creation / review-response)。
-- `レビュー待ち` — ready PR として正式なレビューを待っている (pr-creation / review-response)。
-- `指摘対応中` — レビューでの指摘事項や CI の不具合に対応している (review-response)。
-- `再レビュー待ち` — 指摘された修正を反映し、再レビューを待っている (review-response)。
-- `マージ待ち` — ユーザーへ最終確認とマージを依頼済みである (development-flow)。
-- `merge queue 待ち` — merge queue に投入済みである (development-flow)。
-- `完了` — マージと後処理の完了が確認できている (development-flow)。
-
 ## ドキュメントとの連携
 
-フローの各段階で生成される情報 (Issue の本文、実装計画、進捗状況、PR の本文、コミットメッセージなど) の記載場所については、documentation スキルの置き場マップ ([placement_map.md](../documentation/references/placement_map.md)) に従う。
+フローの各段階で生成される情報 (Issue の本文、実装計画、PR の本文、コミットメッセージなど) の記載場所については、documentation スキルの置き場マップ ([placement_map.md](../documentation/references/placement_map.md)) に従う。
 
 大規模な設計においては、前述の「設計が必要な場合の流れ」に従い、実装に着手する前に Design Doc のレビューを済ませる。さらに、Design Doc から将来的な制約事項となる決定を ADR として切り出し、実装・ADR・docs・CHANGELOG に対する変更をすべて 1 つの PR にまとめてレビューに出す。
 
@@ -103,4 +88,3 @@ development-flow が直接担当する手順は、以下の文書に規定する
 
 - [scripts/create_worktree.sh](./scripts/create_worktree.sh): `bash .claude/skills/development-flow/scripts/create_worktree.sh <branch-name>` を実行し、作業ブランチと worktree を命名規則に従って作成するか、あるいは再利用する。
 - [scripts/cleanup.sh](./scripts/cleanup.sh): `bash .claude/skills/development-flow/scripts/cleanup.sh <PR番号> [--yes]` を実行し、マージ後の後処理 (remote branch 削除 → worktree 削除 → local branch 削除 → default branch 同期) を順次進める。
-- [scripts/add_progress_comment.sh](./scripts/add_progress_comment.sh): `bash .claude/skills/development-flow/scripts/add_progress_comment.sh <issue番号> <body_file>` を実行し、Issue に進捗コメントを投稿する。状態の変化があるたびに呼び出す。```

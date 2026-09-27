@@ -11,7 +11,7 @@ description: レビュー対応を担うスキルである。PR の状態を確�
 
 ## 手順
 
-まず、対応する Issue をユーザーに尋ね、その Issue のコメント履歴から branch 名と PR を確認して、対象 branch を特定する。特定できたら、`bash .claude/skills/review-response/scripts/add_progress_comment.sh <issue番号> <body_file>` で進捗コメントを投稿し、状態を「指摘対応中」に記録する。
+まず、対応する Issue を特定し、その Issue に関連付けられた PR から head branch を確認する。Issue と PR の関連付けや対象ブランチを確認できない場合は、ユーザーに確認する。
 
 ここからは、未対応の指摘がなくなるまで、指摘 1 件ずつ「修正 → コミット → push → 返答」のサイクルを繰り返す。
 
@@ -43,11 +43,9 @@ description: レビュー対応を担うスキルである。PR の状態を確�
 本指摘は、コメント (https://github.com/.../pull/123#discussion_r456) への返答で示したコミット `abc1234` にて、あわせて修正しています。
 ```
 
-### 進捗の記録と再レビュー待ち
+### 再レビュー待ち
 
-すべての指摘への対応が済んだら、`bash .claude/skills/review-response/scripts/add_progress_comment.sh <issue番号> <body_file>` で進捗コメントを投稿し、状態を記録する。状態は、ready な PR の再レビューを待つ場合は「再レビュー待ち」、draft のまま継続する場合は「ドラフトレビュー中」とする。
-
-その後は再レビューを待ち、新たな指摘が届いたら、手順の最初に戻って同じサイクルを繰り返す。
+すべての指摘への対応が済んだら、ready な PR は再レビューを待ち、draft の PR は draft のまま継続する。新たな指摘が届いたら、手順の最初に戻って同じサイクルを繰り返す。
 
 ## 全般ルール
 
@@ -67,7 +65,6 @@ description: レビュー対応を担うスキルである。PR の状態を確�
 - [reply_review.sh](./scripts/reply_review.sh): `bash .claude/skills/review-response/scripts/reply_review.sh <PR番号> <review_node_id> <body_file> <commit_hash|->` で、レビュー全体へ引用付きで返答する。
 - [reply_inline.sh](./scripts/reply_inline.sh): `bash .claude/skills/review-response/scripts/reply_inline.sh <PR番号> <comment_id> <body_file> <commit_hash|->` で、インライン review comment に返答する。
 - [reply_comment.sh](./scripts/reply_comment.sh): `bash .claude/skills/review-response/scripts/reply_comment.sh <PR番号> <comment_id> <body_file> <commit_hash|->` で、通常の PR コメントへ引用付きで返答する。
-- [add_progress_comment.sh](./scripts/add_progress_comment.sh): `bash .claude/skills/review-response/scripts/add_progress_comment.sh <issue番号> <body_file>` で Issue に進捗コメントを投稿する。状態変化のたびに使う。
 
 ## 連携サブエージェント
 
