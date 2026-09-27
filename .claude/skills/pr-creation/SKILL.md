@@ -69,11 +69,9 @@ bash .claude/skills/pr-creation/scripts/set_ready.sh <PR番号>
 
 自分の見直しで問題が見つかった場合や、ユーザーが draft のまま置くことを望んだ場合は、切り替えずに draft のまま次へ進む。
 
-### レビュー依頼と進捗の記録
+### レビュー依頼
 
 ready に切り替えた場合は、「レビューを依頼するユーザーがいれば GitHub ユーザー名を教えてください」とユーザーに尋ねる。指定があれば `bash .claude/skills/pr-creation/scripts/add_reviewer.sh <PR番号> <username>` でレビュアーを追加し、不要との回答であればこのステップはスキップする。
-
-最後に、PR の URL と状態を進捗コメントとして対応 Issue に記録する。コメント本文をファイルに書き出し、`bash .claude/skills/pr-creation/scripts/add_progress_comment.sh <issue番号> <body_file>` で投稿する。状態は ready に切り替えた場合は「レビュー待ち」、draft のままの場合は「ドラフトレビュー中」とする。
 
 ## 原則
 
@@ -84,7 +82,6 @@ PR のタイトルおよび本文は日本語で書く。本文の文章は `wri
 - [ ] 作業ブランチが origin に push 済みである。
 - [ ] PR が、ユーザーに確認した PR 先ブランチ向けに draft として作成または再利用されている。
 - [ ] ready への切り替えについてユーザーに確認し、承認された場合は切り替えが済んでいる。
-- [ ] PR の URL と状態が進捗コメントとして対応 Issue に記録されている。
 
 ## テンプレート
 
@@ -95,4 +92,3 @@ PR のタイトルおよび本文は日本語で書く。本文の文章は `wri
 - [create_pr.sh](./scripts/create_pr.sh): `bash .claude/skills/pr-creation/scripts/create_pr.sh <タイトル> <body_file> <head_branch> [base_branch]` で、本文末尾に署名を自動付加して PR を draft として作成する。`base_branch` を省略した場合は origin の default branch を使う。
 - [set_ready.sh](./scripts/set_ready.sh): `bash .claude/skills/pr-creation/scripts/set_ready.sh <PR番号>` で draft PR を ready に切り替える。切り替え前に必ずユーザーの承認を得ること。
 - [add_reviewer.sh](./scripts/add_reviewer.sh): `bash .claude/skills/pr-creation/scripts/add_reviewer.sh <PR番号> <username>` でレビュー依頼を追加する。
-- [add_progress_comment.sh](./scripts/add_progress_comment.sh): `bash .claude/skills/pr-creation/scripts/add_progress_comment.sh <issue番号> <body_file>` で Issue に進捗コメントを投稿する。PR 作成時に PR URL と状態を記録するために使う。

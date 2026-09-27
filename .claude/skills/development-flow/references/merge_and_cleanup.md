@@ -8,7 +8,7 @@
 
 ### 事前確認
 
-この段階の作業は、制御用 worktree (メインリポジトリー) で実行する。まず、カレントブランチが default branch であることと、作業とは無関係な未コミットの差分がないことを確認する。次に、Issue のコメント履歴から対応するブランチ名と PR を特定する。特定できない場合は処理を中断し、ユーザーに確認する。作業用 worktree のパスは、ブランチ名を元に [sync_main.md](./sync_main.md) の配置規則に従って導出する。
+この段階の作業は、制御用 worktree (メインリポジトリー) で実行する。まず、カレントブランチが default branch であることと、作業とは無関係な未コミットの差分がないことを確認する。次に、Issue に関連付けられた PR とその head branch を確認する。関連付けが見つからない場合や複数の PR が候補になる場合は処理を中断し、ユーザーに確認する。作業用 worktree のパスは、ブランチ名を元に [sync_main.md](./sync_main.md) の配置規則に従って導出する。
 
 続いて PR のステータスを確認し、その後の手順を分岐させる。ステータスが `MERGED` の場合は「マージ後の確認と後処理」へ進む。`CLOSED` かつ未マージの場合は処理を中断し、作業を再開するか破棄 (abandon) するかをユーザーに確認する。`OPEN` の場合は、以降の手順へ進む。
 
@@ -32,11 +32,11 @@ Issue の完了条件がすべて達成されていること、また、PR が o
 
 ### マージの依頼
 
-マージの進め方は、merge queue を使用するかどうかで分かれる。どちらの場合でも、進捗コメントの投稿には `bash .claude/skills/development-flow/scripts/add_progress_comment.sh <issue番号> <body_file>` を使用する。
+マージの進め方は、merge queue を使用するかどうかで分かれる。
 
-merge queue を使用しない場合は、進捗コメントとして現在の状態を「マージ待ち」と記録したうえで、後述の「マージ依頼テンプレート」を用いてユーザーにマージを依頼する。マージ作業はユーザー自身が GitHub の Web 画面上で行うことを基本とするが、AI Agent が代行する場合はユーザーの承認を得てから `gh pr merge` を実行する。
+merge queue を使用しない場合は、後述の「マージ依頼テンプレート」を用いてユーザーにマージを依頼する。マージ作業はユーザー自身が GitHub の Web 画面上で行うことを基本とするが、AI Agent が代行する場合はユーザーの承認を得てから `gh pr merge` を実行する。
 
-merge queue を使用する場合は、進捗コメントとして状態を「merge queue 待ち」と記録し、後述の「merge queue 投入依頼テンプレート」を用いてキューへの投入を依頼する。AI Agent が代行する場合は、承認を得てから `gh pr merge --auto` を実行する。キューへの投入後は PR のステータスが `MERGED` になるまで待機し、checks の失敗などでキューから外れてしまった場合は review-response スキルに戻って対応する。
+merge queue を使用する場合は、後述の「merge queue 投入依頼テンプレート」を用いてキューへの投入を依頼する。AI Agent が代行する場合は、承認を得てから `gh pr merge --auto` を実行する。キューへの投入後は PR のステータスが `MERGED` になるまで待機し、checks の失敗などでキューから外れてしまった場合は review-response スキルに戻って対応する。
 
 ### マージ後の確認と後処理
 
@@ -54,7 +54,7 @@ bash .claude/skills/development-flow/scripts/cleanup.sh 123 --yes
 
 本スクリプトは、remote branch の削除、worktree の削除、local branch の削除、default branch の同期をこの順で実行する。worktree を先に削除しておかないと local branch の削除に失敗するため、この実行順序を変更してはならない。なお、`Squash and merge` や `Rebase and merge` を用いてマージした場合、ローカルの作業ブランチが default branch の直接の祖先にならず、`git branch -d` コマンドが失敗することがある。しかし、PR が `MERGED` となり変更が確実に取り込まれていれば問題はなく、スクリプトは自動で `git branch -D` にフォールバックして削除を完了させる。
 
-後処理まで完了したら、進捗コメントとして状態を「完了」と記録し、最終的な結果 (マージされた PR、Issue のクローズ状態、実行した後処理の内容) を要約してユーザーに報告する。「完了」という状態は後処理まで無事に済んだことを意味するため、この記録は必ず後処理の後に行うこと。
+後処理まで完了したら、最終的な結果 (マージされた PR、Issue のクローズ状態、実行した後処理の内容) を要約してユーザーに報告する。
 
 ### マージ依頼テンプレート
 
@@ -89,6 +89,5 @@ GitHub Web で `Add to merge queue` または `Merge when ready` をお願いし
 
 - [ ] 該当する ADR や Design Doc がある場合、ステータスが確定され push 済みであること。
 - [ ] 対象の変更が default branch に取り込まれていること。
-- [ ] 進捗コメントに「完了」と記録されていること。
 - [ ] 作業用の worktree とブランチが削除されていること。
 - [ ] 制御用 worktree の default branch が同期されていること。
