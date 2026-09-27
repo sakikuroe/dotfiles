@@ -8,7 +8,7 @@
 
 まず、ブランチ名を `<kind>/<issue番号>-<short-description>` の形式で決める。`kind` には変更の性質に応じて `feature` / `fix` / `hotfix` / `chore` / `docs` / `refactor` のいずれかを選ぶ。たとえば、検索フィルターを追加する Issue #123 であれば、`feature/123-add-search-filters` のようになる。
 
-ブランチ名が決まったら、メインリポジトリー (制御用 worktree) で次のスクリプトを実行する。このスクリプトは、リモートの最新化、local / remote ブランチの有無の確認、worktree の作成までを一括して行い、対応するブランチや worktree がすでに存在する場合はそれを再利用する。ブランチが存在しない場合は、origin の default branch を起点として新しいブランチと worktree を同時に作成する。そのため、制御用 worktree 上で直接 `git checkout -b` を実行してはならない。これを実行すると、default branch に固定しておくべき制御用 worktree 自体が、作業ブランチへと切り替わってしまうからである。
+ブランチ名が決まったら、メインリポジトリー (制御用 worktree) で次のスクリプトを実行する。このスクリプトは、リモートの最新化、local / remote ブランチの有無の確認、worktree の作成までを一括して行い、対応するブランチや worktree がすでに存在する場合はそれを再利用する。ブランチが存在しない場合は、origin の default branch を起点として新しいブランチと worktree を同時に作成する。そのため、制御用 worktree 上で直接 `git checkout -b` を実行してはならない。これを実行すると、default branch に固定しておくべき制御用 worktree 自体が、作業ブランチへと切り替わってしまうためである。
 
 ```bash
 # 実行場所: メインリポジトリー
